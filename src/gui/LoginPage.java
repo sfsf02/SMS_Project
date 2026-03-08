@@ -160,6 +160,7 @@ public class LoginPage extends javax.swing.JFrame {
     passwordField.setText("");
     rememberMeCheck.setSelected(false); 
     messageLabel.setText("");
+    loginProgressBar.setValue(0);
     }//GEN-LAST:event_resetBtnActionPerformed
 
     /**
