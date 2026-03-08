@@ -1,8 +1,10 @@
+package models;
 public class Student extends Person implements DatabaseOperations { 
     // Fields include id, course, and marks 
+    private String id;
     private String course;
     private double marks;
-
+    
     // Constructor to initialize Person fields and Student fields
     public Student(String name, String email, String id, String course, double marks) {
         super(name, email);

@@ -25,3 +25,17 @@ replay_pid*
 
 # VS Code specific files
 .vscode/
+
+# NetBeans project-specific files
+/nbproject/private/
+
+# Build and distribution directories created by NetBeans
+build/
+dist/
+nbbuild/
+nbdist/
+
+
+# OS generated files (good practice)
+.DS_Store
+Thumbs.db
