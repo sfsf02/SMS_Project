@@ -81,6 +81,7 @@ public class LoginPage extends javax.swing.JFrame {
 
         loginBtn.setBackground(new java.awt.Color(21, 46, 255));
         loginBtn.setText("Login");
+        loginBtn.addActionListener(this::loginBtnActionPerformed);
 
         resetBtn.setText("Reset");
         resetBtn.addActionListener(this::resetBtnActionPerformed);
@@ -156,12 +157,22 @@ public class LoginPage extends javax.swing.JFrame {
     }//GEN-LAST:event_usernameFieldActionPerformed
 
     private void resetBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetBtnActionPerformed
-    usernameField.setText("");
-    passwordField.setText("");
-    rememberMeCheck.setSelected(false); 
-    messageLabel.setText("");
-    loginProgressBar.setValue(0);
+        usernameField.setText("");
+        passwordField.setText("");
+        rememberMeCheck.setSelected(false); 
+        messageLabel.setText("");
+        loginProgressBar.setValue(0);
     }//GEN-LAST:event_resetBtnActionPerformed
+
+    private void loginBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginBtnActionPerformed
+        String user= usernameField.getText();
+        String hashPass = utils.StringHelper.hashPassword(passwordField.getPassword());
+        System.out.println("Username: " + user);
+        System.out.println("Hashed Password: " + hashPass);
+        
+
+// TODO add your handling code here:
+    }//GEN-LAST:event_loginBtnActionPerformed
 
     /**
      * @param args the command line arguments

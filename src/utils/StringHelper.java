@@ -1,5 +1,7 @@
 package utils;
-
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 public class StringHelper {
 
     /**
@@ -101,5 +103,39 @@ public class StringHelper {
         }
         
         return result.toString();
+    }
+    
+    /**
+     * Hashes a password character array using SHA-256.
+     * @param password the raw password from the JPasswordField
+     * @return the hashed password as a hexadecimal string
+     */
+    public static String hashPassword(char[] password) {
+        if (password == null || password.length == 0) {
+            return "";
+        }
+        try {
+            // Initialize the SHA-256 algorithm
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            
+            // Convert the char[] to a String, then to bytes for hashing
+            byte[] hashBytes = digest.digest(new String(password).getBytes("UTF-8"));
+            
+            // Convert the byte array into a readable Hex string
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hashBytes) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    hexString.append('0'); // Pad with leading zero if needed
+                }
+                hexString.append(hex);
+            }
+            return hexString.toString();
+            
+        } catch (UnsupportedEncodingException | NoSuchAlgorithmException ex) {
+            System.err.println("CRITICAL: Cryptographic failure during password hashing.");
+            ex.printStackTrace();
+            throw new IllegalStateException("System missing required SHA-256 or UTF-8 support.", ex);
+        }
     }
 }
