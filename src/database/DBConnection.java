@@ -11,7 +11,7 @@ public class DBConnection {
     // Database credentials (adjust these for MySQL or SQLite)
     private static final String URL = "jdbc:mysql://localhost:3306/sms_database";
     private static final String USER = "root";
-    private static final String PASSWORD = "12345678";
+    private static final String PASSWORD = "your_db_password";
 
     /**
      * Establishes the connection to the database.
