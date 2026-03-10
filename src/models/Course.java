@@ -5,12 +5,12 @@ import java.sql.*;
 import models.DatabaseOperations;
 
 public class Course implements DatabaseOperations {
-    private int courseId;
+    private String courseId;
     private String courseName;
     private double creditWeight;
 
     // Constructor with all fields
-    public Course(int courseId, String courseName, double creditWeight) {
+    public Course(String courseId, String courseName, double creditWeight) {
         this.courseId = courseId;
         this.courseName = courseName;
         this.creditWeight = creditWeight;
@@ -20,43 +20,78 @@ public class Course implements DatabaseOperations {
     public Course() {
     }
 
-    // ADD METHOD
+    // CREATE - Add course to database
     @Override
     public void add() {
-        String sql = "INSERT INTO courses (course_name, credit_weight) VALUES (?, ?)";
+        String sql = "INSERT INTO courses (course_id, course_name, credit_weight) VALUES (?, ?, ?)";
         
-        try (Connection conn = DBConnection.connect();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (java.sql.Connection conn = database.DBConnection.getConnection();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            pstmt.setString(1, this.courseName);
-            pstmt.setDouble(2, this.creditWeight);
+            // 1. Sanitize the inputs before they hit the database!
+            String cleanId = this.courseId.trim().toUpperCase(); // Forces IDs to look like "CSC101"
+            
+            // Call YOUR custom method to perfectly capitalize the course name!
+            String cleanName = utils.StringHelper.toTitleCase(this.courseName); 
+            
+            // 2. Set the sanitized variables into the Prepared Statement
+            pstmt.setString(1, cleanId);
+            pstmt.setString(2, cleanName);
+            pstmt.setDouble(3, this.creditWeight);
+            
+            // 3. Execute
             pstmt.executeUpdate();
             
-            System.out.println("✅ Course added: " + this.courseName);
+            // Update the object's internal state to match the clean database version
+            this.courseId = cleanId;
+            this.courseName = cleanName;
             
-        } catch (SQLException e) {
-            System.out.println("❌ Error adding course: " + e.getMessage());
+            System.out.println("✅ Course permanently added: " + cleanName);
+            
+        } catch (java.sql.SQLException e) {
+            System.err.println("❌ Error adding course: " + e.getMessage());
         }
     }
-
-    // DELETE method stub
+    // DELETE - Remove course from database
     @Override
     public void delete() {
-        // TODO: Implement delete method
-        System.out.println("Delete method called");
+        String sql = "DELETE FROM courses WHERE course_id = ?";
+        
+        try (java.sql.Connection conn = database.DBConnection.getConnection();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            // Ensure the ID is formatted correctly before searching the database
+            String targetId = this.courseId.trim().toUpperCase();
+            pstmt.setString(1, targetId); 
+            
+            int affectedRows = pstmt.executeUpdate();
+            
+            if (affectedRows > 0) {
+                // Use YOUR custom method to build a clean log string
+                String logMessage = utils.StringHelper.concatenateStrings(
+                    " | ", 
+                    "✅ SUCCESS", 
+                    "Action: DELETED", 
+                    "Target ID: " + targetId
+                );
+                System.out.println(logMessage);
+            } else {
+                System.out.println("❌ Course not found. ID: " + targetId);
+            }
+            
+        } catch (java.sql.SQLException e) {
+            System.err.println("❌ Error deleting course: " + e.getMessage());
+        }
     }
-
     // UPDATE method stub
     @Override
     public void update() {
-        // TODO: Implement update method
         System.out.println("Update method called");
     }
 
     // SEARCH method stub
     @Override
     public void search(String keyword) {
-        // TODO: Implement search method
         System.out.println("Search method called for: " + keyword);
     }
 }
