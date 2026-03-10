@@ -122,9 +122,71 @@ public class Course implements DatabaseOperations {
         }
     }
 
-    // SEARCH method stub
+   // SEARCH method - Find courses matching keyword
+// SEARCH method - Find courses matching keyword
     @Override
     public void search(String keyword) {
-        System.out.println("Search method called for: " + keyword);
-    }
-}
+        String sql = "SELECT * FROM courses WHERE course_id LIKE ? OR course_name LIKE ?";
+        
+        try (java.sql.Connection conn = database.DBConnection.getConnection();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            // Clean the search keyword - trim and prepare for LIKE search
+            String cleanKeyword = keyword.trim();
+            String searchPattern = "%" + cleanKeyword + "%";  // % allows partial matching
+            
+            // Set the same pattern for both ID and Name searches
+            pstmt.setString(1, searchPattern);
+            pstmt.setString(2, searchPattern);
+            
+            java.sql.ResultSet rs = pstmt.executeQuery();
+            
+            // NEW: Use an integer to track the count safely!
+            int matchCount = 0; 
+            
+            String header = utils.StringHelper.concatenateStrings(
+                " | ",
+                "Search Results for: " + cleanKeyword,
+                "----------------------------------------"
+            );
+            System.out.println(header);
+            
+            // Loop through all results
+            while (rs.next()) {
+                matchCount++; // Increment the counter for every row found
+                
+                String resultLine = utils.StringHelper.concatenateStrings(
+                    " | ",
+                    "ID: " + rs.getString("course_id"),
+                    "Name: " + rs.getString("course_name"),
+                    "Weight: " + rs.getDouble("credit_weight")
+                );
+                System.out.println(resultLine);
+            }
+            
+            if (matchCount == 0) {
+                String notFoundMsg = utils.StringHelper.concatenateStrings(
+                    " | ",
+                    "❌ No courses found",
+                    "Search term: " + cleanKeyword
+                );
+                System.out.println(notFoundMsg);
+            } else {
+                String footer = utils.StringHelper.concatenateStrings(
+                    " | ",
+                    "✅ Search complete",
+                    "Total found: " + matchCount // Use the safe integer variable here
+                );
+                System.out.println(footer);
+            }
+            
+        } catch (java.sql.SQLException e) {
+            String errorMsg = utils.StringHelper.concatenateStrings(
+                " | ",
+                "❌ ERROR",
+                "Action: SEARCH",
+                "Error: " + e.getMessage()
+            );
+            System.err.println(errorMsg);
+        }
+    }}
