@@ -8,10 +8,12 @@ public class Course implements DatabaseOperations {
     private String courseId;
     private String courseName;
     private double creditWeight;
+    private String originalCourseId;
 
     // Constructor with all fields
-    public Course(String courseId, String courseName, double creditWeight) {
+    public Course(String courseId, String courseName, double creditWeight,String originalCourseId) {
         this.courseId = courseId;
+        this.originalCourseId = courseId;
         this.courseName = courseName;
         this.creditWeight = creditWeight;
     }
@@ -83,10 +85,41 @@ public class Course implements DatabaseOperations {
             System.err.println("❌ Error deleting course: " + e.getMessage());
         }
     }
-    // UPDATE method stub
-    @Override
+   // UPDATE method - Modifies existing course in database
+@Override
     public void update() {
-        System.out.println("Update method called");
+        // Notice we are now updating the course_id column too!
+        String sql = "UPDATE courses SET course_id = ?, course_name = ?, credit_weight = ? WHERE course_id = ?";
+        
+        try (java.sql.Connection conn = database.DBConnection.getConnection();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            String newCleanId = this.courseId.trim().toUpperCase();
+            String cleanName = utils.StringHelper.toTitleCase(this.courseName);
+            
+            // Set the new values
+            pstmt.setString(1, newCleanId);
+            pstmt.setString(2, cleanName);
+            pstmt.setDouble(3, this.creditWeight);
+            
+            // Set the WHERE clause to look for the ORIGINAL ID!
+            pstmt.setString(4, this.originalCourseId);
+            
+            int affectedRows = pstmt.executeUpdate();
+            
+            if (affectedRows > 0) {
+                // Success! Now the original ID matches the new ID.
+                this.originalCourseId = newCleanId; 
+                this.courseId = newCleanId;
+                this.courseName = cleanName;
+                System.out.println("✅ SUCCESS: Course updated.");
+            } else {
+                throw new RuntimeException("Update failed: Original Course ID '" + this.originalCourseId + "' not found.");
+            }
+            
+        } catch (java.sql.SQLException e) {
+            throw new RuntimeException("Database error during update: " + e.getMessage(), e);
+        }
     }
 
     // SEARCH method stub
