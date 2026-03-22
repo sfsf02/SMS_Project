@@ -85,6 +85,38 @@ public class Student extends Person implements DatabaseOperations {
     }
 
     // ============================================================
+    // LOGIC HELPERS
+    // ============================================================
+    
+    /**
+     * Resets the originalId to match the current id.
+     * Call this after successful database updates.
+     */
+    public void syncOriginalId() {
+        this.originalId = this.id;
+    }
+    
+    /**
+     * Checks if the student is passing (marks >= 50)
+     * @return true if marks are 50 or above
+     */
+    public boolean isPassing() {
+        return this.marks >= 50;
+    }
+    
+    /**
+     * Returns letter grade based on marks
+     * @return A, B, C, D, or F
+     */
+    public String getGrade() {
+        if (marks >= 80) return "A";
+        if (marks >= 70) return "B";
+        if (marks >= 60) return "C";
+        if (marks >= 50) return "D";
+        return "F";
+    }
+
+    // ============================================================
     // DISPLAY INFO
     // ============================================================
     
