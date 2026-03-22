@@ -1,5 +1,7 @@
 package models;
 
+import utils.StringHelper;
+
 public class Student extends Person implements DatabaseOperations { 
     // Fields include id, course, and marks 
     private String id;
@@ -45,7 +47,7 @@ public class Student extends Person implements DatabaseOperations {
     }
     
     public void setCourse(String course) {
-        this.course = utils.StringHelper.toTitleCase(course);
+        this.course = StringHelper.toTitleCase(course);
     }
     
     public double getMarks() {
@@ -56,6 +58,30 @@ public class Student extends Person implements DatabaseOperations {
         if (marks < 0) this.marks = 0;
         else if (marks > 100) this.marks = 100;
         else this.marks = marks;
+    }
+
+    // ============================================================
+    // PERSON GETTERS/SETTERS OVERRIDE
+    // ============================================================
+    
+    @Override
+    public String getName() {
+        return super.getName();
+    }
+    
+    @Override
+    public void setName(String name) {
+        super.setName(StringHelper.toTitleCase(name));
+    }
+    
+    @Override
+    public String getEmail() {
+        return super.getEmail();
+    }
+    
+    @Override
+    public void setEmail(String email) {
+        super.setEmail(email == null ? "" : email.trim().toLowerCase());
     }
 
     // ============================================================
