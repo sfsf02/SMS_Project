@@ -146,6 +146,25 @@ public class Student extends Person implements DatabaseOperations {
     @Override
     public void add() {
         // JDBC PreparedStatement logic to insert this student 
+        String sql = "INSERT INTO students (student_id, name, email, course, marks) VALUES (?, ?, ?, ?, ?)";
+    
+    try (java.sql.Connection conn = database.DBConnection.getConnection();
+         java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        
+        pstmt.setString(1, this.id);
+        pstmt.setString(2, this.getName());
+        pstmt.setString(3, this.getEmail());
+        pstmt.setString(4, this.course);
+        pstmt.setDouble(5, this.marks);
+        
+        pstmt.executeUpdate();
+        
+        this.syncOriginalId();
+        System.out.println("✅ SUCCESS: Student added - " + this.getName() + " (ID: " + this.id + ")");
+        
+    } catch (java.sql.SQLException e) {
+        throw new RuntimeException("Database error adding student: " + e.getMessage(), e);
+    }
     }
 
     @Override
