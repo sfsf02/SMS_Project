@@ -37,6 +37,28 @@ public class Student extends Person implements DatabaseOperations {
     }
 
     // ============================================================
+    // COURSE & MARKS GETTERS/SETTERS
+    // ============================================================
+    
+    public String getCourse() {
+        return course;
+    }
+    
+    public void setCourse(String course) {
+        this.course = utils.StringHelper.toTitleCase(course);
+    }
+    
+    public double getMarks() {
+        return marks;
+    }
+    
+    public void setMarks(double marks) {
+        if (marks < 0) this.marks = 0;
+        else if (marks > 100) this.marks = 100;
+        else this.marks = marks;
+    }
+
+    // ============================================================
     // DISPLAY INFO
     // ============================================================
     
