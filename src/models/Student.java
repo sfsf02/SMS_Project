@@ -120,10 +120,23 @@ public class Student extends Person implements DatabaseOperations {
     // DISPLAY INFO
     // ============================================================
     
-    // Override displayInfo() 
     @Override
     public void displayInfo() {
-        // Code to display student details goes here
+        String border = "╔══════════════════════════════════════════╗";
+        String separator = "╠══════════════════════════════════════════╣";
+        String bottom = "╚══════════════════════════════════════════╝";
+        
+        System.out.println(border);
+        System.out.println("║            STUDENT DETAILS               ║");
+        System.out.println(separator);
+        System.out.printf("║ %-10s: %-25s ║%n", "ID", id);
+        System.out.printf("║ %-10s: %-25s ║%n", "Name", getName());
+        System.out.printf("║ %-10s: %-25s ║%n", "Email", getEmail());
+        System.out.printf("║ %-10s: %-25s ║%n", "Course", course);
+        System.out.printf("║ %-10s: %-25.1f ║%n", "Marks", marks);
+        System.out.printf("║ %-10s: %-25s ║%n", "Grade", getGrade());
+        System.out.printf("║ %-10s: %-25s ║%n", "Status", (isPassing() ? "PASS" : "FAIL"));
+        System.out.println(bottom);
     }
 
     // ============================================================
