@@ -1,27 +1,32 @@
 package models;
 
 import utils.StringHelper;
+import database.DBConnection;
+import java.sql.*;
 
 public class Student extends Person implements DatabaseOperations { 
-    // Fields include id, course, and marks 
     private String id;
     private String course;
     private double marks;
-    private String originalId;  // Track ID changes
+    private String originalId;
     
-    // Constructor to initialize Person fields and Student fields
     public Student(String name, String email, String id, String course, double marks) {
         super(name, email);
         this.id = id;
-        this.originalId = id;  // Set original ID to match current ID
+        this.originalId = id;
         this.course = course;
         this.marks = marks;
     }
-
-    // ============================================================
-    // GETTERS & DEFENSIVE SETTERS
-    // ============================================================
     
+    public Student() {
+        super("", "");
+        this.id = "";
+        this.originalId = "";
+        this.course = "";
+        this.marks = 0;
+    }
+
+    // Getters & Defensive Setters
     public String getId() {
         return id;
     }
@@ -37,17 +42,13 @@ public class Student extends Person implements DatabaseOperations {
     public void setOriginalId(String originalId) {
         this.originalId = (originalId == null) ? "" : originalId.trim().toUpperCase();
     }
-
-    // ============================================================
-    // COURSE & MARKS GETTERS/SETTERS
-    // ============================================================
     
     public String getCourse() {
         return course;
     }
     
     public void setCourse(String course) {
-        this.course = StringHelper.toTitleCase(course);
+        this.course = (course == null) ? "" : StringHelper.toTitleCase(course);
     }
     
     public double getMarks() {
@@ -59,55 +60,26 @@ public class Student extends Person implements DatabaseOperations {
         else if (marks > 100) this.marks = 100;
         else this.marks = marks;
     }
-
-    // ============================================================
-    // PERSON GETTERS/SETTERS OVERRIDE
-    // ============================================================
-    
-    @Override
-    public String getName() {
-        return super.getName();
-    }
     
     @Override
     public void setName(String name) {
-        super.setName(StringHelper.toTitleCase(name));
-    }
-    
-    @Override
-    public String getEmail() {
-        return super.getEmail();
+        super.setName((name == null) ? "" : StringHelper.toTitleCase(name));
     }
     
     @Override
     public void setEmail(String email) {
-        super.setEmail(email == null ? "" : email.trim().toLowerCase());
+        super.setEmail((email == null) ? "" : email.trim().toLowerCase());
     }
 
-    // ============================================================
-    // LOGIC HELPERS
-    // ============================================================
-    
-    /**
-     * Resets the originalId to match the current id.
-     * Call this after successful database updates.
-     */
+    // Logic Helpers
     public void syncOriginalId() {
         this.originalId = this.id;
     }
     
-    /**
-     * Checks if the student is passing (marks >= 50)
-     * @return true if marks are 50 or above
-     */
     public boolean isPassing() {
         return this.marks >= 50;
     }
     
-    /**
-     * Returns letter grade based on marks
-     * @return A, B, C, D, or F
-     */
     public String getGrade() {
         if (marks >= 80) return "A";
         if (marks >= 70) return "B";
@@ -116,69 +88,129 @@ public class Student extends Person implements DatabaseOperations {
         return "F";
     }
 
-    // ============================================================
-    // DISPLAY INFO
-    // ============================================================
-    
     @Override
     public void displayInfo() {
-        String border = "╔══════════════════════════════════════════╗";
-        String separator = "╠══════════════════════════════════════════╣";
-        String bottom = "╚══════════════════════════════════════════╝";
-        
-        System.out.println(border);
-        System.out.println("║            STUDENT DETAILS               ║");
-        System.out.println(separator);
-        System.out.printf("║ %-10s: %-25s ║%n", "ID", id);
-        System.out.printf("║ %-10s: %-25s ║%n", "Name", getName());
-        System.out.printf("║ %-10s: %-25s ║%n", "Email", getEmail());
-        System.out.printf("║ %-10s: %-25s ║%n", "Course", course);
-        System.out.printf("║ %-10s: %-25.1f ║%n", "Marks", marks);
-        System.out.printf("║ %-10s: %-25s ║%n", "Grade", getGrade());
-        System.out.printf("║ %-10s: %-25s ║%n", "Status", (isPassing() ? "PASS" : "FAIL"));
-        System.out.println(bottom);
+        System.out.println("========================================");
+        System.out.println("STUDENT DETAILS");
+        System.out.println("========================================");
+        System.out.println("ID: " + id);
+        System.out.println("Name: " + getName());
+        System.out.println("Email: " + getEmail());
+        System.out.println("Course: " + course);
+        System.out.println("Marks: " + marks);
+        System.out.println("Grade: " + getGrade());
+        System.out.println("Status: " + (isPassing() ? "PASS" : "FAIL"));
+        System.out.println("========================================");
     }
 
-    // ============================================================
-    // DATABASE OPERATIONS
-    // ============================================================
-    
     @Override
     public void add() {
-        // JDBC PreparedStatement logic to insert this student 
         String sql = "INSERT INTO students (student_id, name, email, course, marks) VALUES (?, ?, ?, ?, ?)";
-    
-    try (java.sql.Connection conn = database.DBConnection.getConnection();
-         java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
         
-        pstmt.setString(1, this.id);
-        pstmt.setString(2, this.getName());
-        pstmt.setString(3, this.getEmail());
-        pstmt.setString(4, this.course);
-        pstmt.setDouble(5, this.marks);
-        
-        pstmt.executeUpdate();
-        
-        this.syncOriginalId();
-        System.out.println("✅ SUCCESS: Student added - " + this.getName() + " (ID: " + this.id + ")");
-        
-    } catch (java.sql.SQLException e) {
-        throw new RuntimeException("Database error adding student: " + e.getMessage(), e);
-    }
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, this.id);
+            pstmt.setString(2, this.getName());
+            pstmt.setString(3, this.getEmail());
+            pstmt.setString(4, this.course);
+            pstmt.setDouble(5, this.marks);
+            pstmt.executeUpdate();
+            
+            this.syncOriginalId();
+            System.out.println("Student added: " + this.getName());
+            
+        } catch (SQLException e) {
+            System.err.println("Error adding student: " + e.getMessage());
+        }
     }
 
     @Override
     public void delete() {
-        // JDBC logic to delete this student
+        String sql = "DELETE FROM students WHERE student_id = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, this.id);
+            int affectedRows = pstmt.executeUpdate();
+            
+            if (affectedRows > 0) {
+                System.out.println("Student deleted: " + this.id);
+            } else {
+                System.out.println("Student not found: " + this.id);
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error deleting student: " + e.getMessage());
+        }
     }
 
     @Override
     public void update() {
-        // JDBC logic to update this student
+        String sql = "UPDATE students SET student_id = ?, name = ?, email = ?, course = ?, marks = ? WHERE student_id = ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, this.id);
+            pstmt.setString(2, this.getName());
+            pstmt.setString(3, this.getEmail());
+            pstmt.setString(4, this.course);
+            pstmt.setDouble(5, this.marks);
+            pstmt.setString(6, this.originalId);
+            
+            int affectedRows = pstmt.executeUpdate();
+            
+            if (affectedRows > 0) {
+                this.syncOriginalId();
+                System.out.println("Student updated: " + this.id);
+            } else {
+                System.out.println("Update failed: Student not found");
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error updating student: " + e.getMessage());
+        }
     }
 
     @Override
     public void search(String keyword) {
-        // JDBC logic with case-insensitive search 
+        String sql = "SELECT * FROM students WHERE student_id LIKE ? OR name LIKE ? OR email LIKE ? OR course LIKE ?";
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            String searchPattern = "%" + keyword + "%";
+            pstmt.setString(1, searchPattern);
+            pstmt.setString(2, searchPattern);
+            pstmt.setString(3, searchPattern);
+            pstmt.setString(4, searchPattern);
+            
+            ResultSet rs = pstmt.executeQuery();
+            int matchCount = 0;
+            
+            System.out.println("Search Results for: " + keyword);
+            System.out.println("----------------------------------------");
+            
+            while (rs.next()) {
+                matchCount++;
+                System.out.println("ID: " + rs.getString("student_id"));
+                System.out.println("Name: " + rs.getString("name"));
+                System.out.println("Email: " + rs.getString("email"));
+                System.out.println("Course: " + rs.getString("course"));
+                System.out.println("Marks: " + rs.getDouble("marks"));
+                System.out.println("----------------------------------------");
+            }
+            
+            if (matchCount == 0) {
+                System.out.println("No students found for: " + keyword);
+            } else {
+                System.out.println("Total found: " + matchCount);
+            }
+            
+        } catch (SQLException e) {
+            System.err.println("Error searching students: " + e.getMessage());
+        }
     }
 }
