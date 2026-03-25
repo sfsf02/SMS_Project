@@ -238,4 +238,21 @@ public class Student extends Person implements DatabaseOperations {
             System.err.println("Error searching students: " + e.getMessage());
         }
     }
+    
+    public static boolean checkEnrollmentExists(String studentId, String courseId) {
+        String sql = "SELECT * FROM enrollments WHERE student_id = ? AND course_id = ?";
+        try (java.sql.Connection conn = database.DBConnection.getConnection();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             
+            pstmt.setString(1, studentId);
+            pstmt.setString(2, courseId);
+            
+            try (java.sql.ResultSet rs = pstmt.executeQuery()) {
+                return rs.next(); // Returns TRUE if a record is found
+            }
+        } catch (java.sql.SQLException e) {
+            System.err.println("Database error checking enrollment: " + e.getMessage());
+        }
+        return false;
+    }
 }

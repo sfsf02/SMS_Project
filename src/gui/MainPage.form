@@ -190,11 +190,11 @@
                   <Properties>
                     <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
                       <Table columnCount="5" rowCount="4">
-                        <Column editable="true" title="Student ID" type="java.lang.Object"/>
-                        <Column editable="true" title="Name" type="java.lang.Object"/>
-                        <Column editable="true" title="Email" type="java.lang.Object"/>
-                        <Column editable="true" title="Course" type="java.lang.Object"/>
-                        <Column editable="true" title="Mark" type="java.lang.Object"/>
+                        <Column editable="false" title="Student ID" type="java.lang.Object"/>
+                        <Column editable="false" title="Name" type="java.lang.Object"/>
+                        <Column editable="false" title="Email" type="java.lang.Object"/>
+                        <Column editable="false" title="Course" type="java.lang.Object"/>
+                        <Column editable="false" title="Mark" type="java.lang.Object"/>
                       </Table>
                     </Property>
                     <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor">
@@ -267,6 +267,15 @@
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="addBtnActionPerformed"/>
                   </Events>
                 </Component>
+                <Component class="javax.swing.JButton" name="addGradeBtn">
+                  <Properties>
+                    <Property name="text" type="java.lang.String" value="Add Grade"/>
+                    <Property name="enabled" type="boolean" value="false"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="addGradeBtnActionPerformed"/>
+                  </Events>
+                </Component>
                 <Component class="javax.swing.JButton" name="updateBtn">
                   <Properties>
                     <Property name="text" type="java.lang.String" value="Update"/>
@@ -304,6 +313,9 @@
                 <Property name="selected" type="boolean" value="true"/>
                 <Property name="text" type="java.lang.String" value="Sort by ID"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="sortIdRadioActionPerformed"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JRadioButton" name="sortNameRadio">
               <Properties>
@@ -323,6 +335,9 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Sort by Marks"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="sortMarksRadioActionPerformed"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JCheckBox" name="passingCheckBox">
               <Properties>

@@ -22,6 +22,23 @@ public class MainPage extends javax.swing.JFrame {
         
         // NEW: Load the data immediately when the app opens!
         refreshStudentTable();
+        // This watches the table to see if a row is highlighted
+        studentTable.getSelectionModel().addListSelectionListener((javax.swing.event.ListSelectionEvent event) -> {
+            // Ignore extra events while the user is dragging their mouse
+            if (!event.getValueIsAdjusting()) {
+                
+                // .getSelectedRow() returns -1 if absolutely nothing is clicked
+                if (studentTable.getSelectedRow() != -1) {
+                    // A row is selected! Turn the button ON.
+                    addGradeBtn.setEnabled(true);
+                    addGradeBtn.setToolTipText("Click to enroll the selected student into a new course.");
+                } else {
+                    // Nothing is selected! Turn the button OFF.
+                    addGradeBtn.setEnabled(false);
+                    addGradeBtn.setToolTipText("Select a student from the table first to enroll them.");
+                }
+            }
+        });
         
     }
 
@@ -44,6 +61,7 @@ public class MainPage extends javax.swing.JFrame {
         searchBtn = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         addBtn = new javax.swing.JButton();
+        addGradeBtn = new javax.swing.JButton();
         updateBtn = new javax.swing.JButton();
         deleteBtn = new javax.swing.JButton();
         searchTypeComboBox = new javax.swing.JComboBox<>();
@@ -81,7 +99,15 @@ public class MainPage extends javax.swing.JFrame {
             new String [] {
                 "Student ID", "Name", "Email", "Course", "Mark"
             }
-        ));
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
         jScrollPane2.setViewportView(studentTable);
 
         Searchlabel.setText("Search by:");
@@ -102,6 +128,11 @@ public class MainPage extends javax.swing.JFrame {
         addBtn.addActionListener(this::addBtnActionPerformed);
         jPanel3.add(addBtn);
 
+        addGradeBtn.setText("Add Grade");
+        addGradeBtn.setEnabled(false);
+        addGradeBtn.addActionListener(this::addGradeBtnActionPerformed);
+        jPanel3.add(addGradeBtn);
+
         updateBtn.setText("Update");
         jPanel3.add(updateBtn);
 
@@ -114,6 +145,7 @@ public class MainPage extends javax.swing.JFrame {
         buttonGroup1.add(sortIdRadio);
         sortIdRadio.setSelected(true);
         sortIdRadio.setText("Sort by ID");
+        sortIdRadio.addActionListener(this::sortIdRadioActionPerformed);
 
         buttonGroup1.add(sortNameRadio);
         sortNameRadio.setText("Sort by Name");
@@ -121,6 +153,7 @@ public class MainPage extends javax.swing.JFrame {
 
         buttonGroup1.add(sortMarksRadio);
         sortMarksRadio.setText("Sort by Marks");
+        sortMarksRadio.addActionListener(this::sortMarksRadioActionPerformed);
 
         passingCheckBox.setText("Show Passing Only (50+)");
         passingCheckBox.addActionListener(this::passingCheckBoxActionPerformed);
@@ -328,6 +361,32 @@ public class MainPage extends javax.swing.JFrame {
         refreshStudentTable();
     }//GEN-LAST:event_searchFieldKeyReleased
 
+    private void sortIdRadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sortIdRadioActionPerformed
+        refreshStudentTable();
+    }//GEN-LAST:event_sortIdRadioActionPerformed
+
+    private void sortMarksRadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sortMarksRadioActionPerformed
+        refreshStudentTable();
+    }//GEN-LAST:event_sortMarksRadioActionPerformed
+
+    private void addGradeBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addGradeBtnActionPerformed
+        int selectedRow = studentTable.getSelectedRow();
+    
+    if (selectedRow != -1) {
+        // Grab the ID (Column 0) and Name (Column 1) from the highlighted row
+        String studentId = studentTable.getValueAt(selectedRow, 0).toString();
+        String studentName = studentTable.getValueAt(selectedRow, 1).toString();
+        
+        // Pass them into the new pop-up
+        AddGradeDialog dialog = new AddGradeDialog(this, true, studentId, studentName);
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+        
+        // Refresh the table when the pop-up closes
+        refreshStudentTable(); 
+    }
+    }//GEN-LAST:event_addGradeBtnActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -438,6 +497,7 @@ public class MainPage extends javax.swing.JFrame {
     private javax.swing.JLabel Searchlabel;
     private javax.swing.JMenu aboutBtn;
     private javax.swing.JButton addBtn;
+    private javax.swing.JButton addGradeBtn;
     private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JButton deleteBtn;
     private javax.swing.JMenuItem exitBtn;
