@@ -17,8 +17,11 @@ public class MainPage extends javax.swing.JFrame {
      */
     public MainPage() {
         initComponents();
-        this.setSize(1024, 768);
-        this.setLocationRelativeTo(null);
+        this.setSize(1024, 870);
+        this.setLocationRelativeTo(null); 
+        
+        // NEW: Load the data immediately when the app opens!
+        refreshStudentTable();
         
     }
 
@@ -31,10 +34,11 @@ public class MainPage extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        buttonGroup1 = new javax.swing.ButtonGroup();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jPanel1 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
-        jTable2 = new javax.swing.JTable();
+        studentTable = new javax.swing.JTable();
         Searchlabel = new javax.swing.JLabel();
         searchField = new javax.swing.JTextField();
         searchBtn = new javax.swing.JButton();
@@ -42,14 +46,32 @@ public class MainPage extends javax.swing.JFrame {
         addBtn = new javax.swing.JButton();
         updateBtn = new javax.swing.JButton();
         deleteBtn = new javax.swing.JButton();
-        jComboBox1 = new javax.swing.JComboBox<>();
+        searchTypeComboBox = new javax.swing.JComboBox<>();
+        sortIdRadio = new javax.swing.JRadioButton();
+        sortNameRadio = new javax.swing.JRadioButton();
+        sortMarksRadio = new javax.swing.JRadioButton();
+        passingCheckBox = new javax.swing.JCheckBox();
+        marksSlider = new javax.swing.JSlider();
+        sliderLabel = new javax.swing.JLabel();
+        showAllBtn = new javax.swing.JButton();
+        jPanel5 = new javax.swing.JPanel();
+        statusLabel = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        fileBtn = new javax.swing.JMenu();
+        printBtn = new javax.swing.JMenuItem();
+        jSeparator1 = new javax.swing.JPopupMenu.Separator();
+        exitBtn = new javax.swing.JMenuItem();
+        aboutBtn = new javax.swing.JMenu();
+        helpBtn = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(30, 30, 30));
-        setPreferredSize(new java.awt.Dimension(1024, 768));
+        setPreferredSize(new java.awt.Dimension(1024, 870));
 
-        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+        jPanel1.setPreferredSize(new java.awt.Dimension(1015, 865));
+
+        studentTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
                 {null, null, null, null, null},
                 {null, null, null, null, null},
@@ -60,13 +82,19 @@ public class MainPage extends javax.swing.JFrame {
                 "Student ID", "Name", "Email", "Course", "Mark"
             }
         ));
-        jScrollPane2.setViewportView(jTable2);
+        jScrollPane2.setViewportView(studentTable);
 
         Searchlabel.setText("Search by:");
 
         searchField.addActionListener(this::searchFieldActionPerformed);
+        searchField.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                searchFieldKeyReleased(evt);
+            }
+        });
 
         searchBtn.setText("Search");
+        searchBtn.addActionListener(this::searchBtnActionPerformed);
 
         jPanel3.setLayout(new java.awt.GridLayout(1, 0));
 
@@ -80,8 +108,50 @@ public class MainPage extends javax.swing.JFrame {
         deleteBtn.setText("Delete");
         jPanel3.add(deleteBtn);
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Student Name", "Course Name" }));
-        jComboBox1.addActionListener(this::jComboBox1ActionPerformed);
+        searchTypeComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Student ID", "Student Name", "Course" }));
+        searchTypeComboBox.addActionListener(this::searchTypeComboBoxActionPerformed);
+
+        buttonGroup1.add(sortIdRadio);
+        sortIdRadio.setSelected(true);
+        sortIdRadio.setText("Sort by ID");
+
+        buttonGroup1.add(sortNameRadio);
+        sortNameRadio.setText("Sort by Name");
+        sortNameRadio.addActionListener(this::sortNameRadioActionPerformed);
+
+        buttonGroup1.add(sortMarksRadio);
+        sortMarksRadio.setText("Sort by Marks");
+
+        passingCheckBox.setText("Show Passing Only (50+)");
+        passingCheckBox.addActionListener(this::passingCheckBoxActionPerformed);
+
+        marksSlider.setMinorTickSpacing(20);
+        marksSlider.setPaintLabels(true);
+        marksSlider.setPaintTicks(true);
+        marksSlider.setValue(0);
+        marksSlider.addChangeListener(this::marksSliderStateChanged);
+
+        sliderLabel.setText("Min Marks: 0");
+
+        showAllBtn.setText("All Student");
+        showAllBtn.addActionListener(this::showAllBtnActionPerformed);
+
+        statusLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        statusLabel.setText("System Ready.");
+
+        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
+        jPanel5.setLayout(jPanel5Layout);
+        jPanel5Layout.setHorizontalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(statusLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        jPanel5Layout.setVerticalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(statusLabel)
+                .addContainerGap(170, Short.MAX_VALUE))
+        );
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -90,21 +160,38 @@ public class MainPage extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 1104, Short.MAX_VALUE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(Searchlabel)
+                        .addGap(35, 35, 35)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(searchTypeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(searchField, javax.swing.GroupLayout.PREFERRED_SIZE, 390, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(47, 47, 47)
+                                .addComponent(searchBtn)
+                                .addGap(18, 18, 18)
+                                .addComponent(showAllBtn))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(sortIdRadio)
+                                .addGap(18, 18, 18)
+                                .addComponent(sortNameRadio)
+                                .addGap(18, 18, 18)
+                                .addComponent(sortMarksRadio)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(passingCheckBox, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(sliderLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(marksSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 352, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addGap(35, 35, 35)
-                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(searchField, javax.swing.GroupLayout.PREFERRED_SIZE, 672, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(29, 29, 29)
-                        .addComponent(searchBtn)
-                        .addGap(47, 47, 47))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jPanel3, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 1011, Short.MAX_VALUE))
+                            .addComponent(jPanel5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
+                                .addComponent(Searchlabel)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addContainerGap())))
         );
         jPanel1Layout.setVerticalGroup(
@@ -116,12 +203,23 @@ public class MainPage extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(searchField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(searchBtn)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(searchTypeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(showAllBtn))
+                .addGap(22, 22, 22)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(sortIdRadio)
+                    .addComponent(sortNameRadio)
+                    .addComponent(sortMarksRadio)
+                    .addComponent(passingCheckBox)
+                    .addComponent(marksSlider, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(sliderLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 501, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(61, 61, 61)
+                .addGap(18, 18, 18)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(152, 152, 152))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         jTabbedPane1.addTab("Student", jPanel1);
@@ -130,16 +228,37 @@ public class MainPage extends javax.swing.JFrame {
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1023, Short.MAX_VALUE)
+            .addGap(0, 1110, Short.MAX_VALUE)
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 799, Short.MAX_VALUE)
+            .addGap(0, 865, Short.MAX_VALUE)
         );
 
         jTabbedPane1.addTab("Course Mangement", jPanel2);
 
         getContentPane().add(jTabbedPane1, java.awt.BorderLayout.PAGE_START);
+
+        fileBtn.setText("File");
+
+        printBtn.setText("print");
+        printBtn.addActionListener(this::printBtnActionPerformed);
+        fileBtn.add(printBtn);
+        fileBtn.add(jSeparator1);
+
+        exitBtn.setText("Exit");
+        exitBtn.addActionListener(this::exitBtnActionPerformed);
+        fileBtn.add(exitBtn);
+
+        jMenuBar1.add(fileBtn);
+
+        aboutBtn.setText("about");
+        jMenuBar1.add(aboutBtn);
+
+        helpBtn.setText("help");
+        jMenuBar1.add(helpBtn);
+
+        setJMenuBar(jMenuBar1);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -152,9 +271,56 @@ public class MainPage extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_addBtnActionPerformed
 
-    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
+    private void searchTypeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchTypeComboBoxActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_jComboBox1ActionPerformed
+    }//GEN-LAST:event_searchTypeComboBoxActionPerformed
+
+    private void exitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitBtnActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_exitBtnActionPerformed
+
+    private void printBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_printBtnActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_printBtnActionPerformed
+
+    private void sortNameRadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sortNameRadioActionPerformed
+        refreshStudentTable();
+    }//GEN-LAST:event_sortNameRadioActionPerformed
+
+    private void passingCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_passingCheckBoxActionPerformed
+        refreshStudentTable();
+    }//GEN-LAST:event_passingCheckBoxActionPerformed
+
+    private void marksSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_marksSliderStateChanged
+        // 1. Instantly update the label the moment the mouse moves. 
+    // This gives the user real-time visual feedback!
+    int currentVal = marksSlider.getValue();
+    sliderLabel.setText("Min Marks: " + currentVal);
+
+    // 2. The "Senior Dev" Optimization:
+    // .getValueIsAdjusting() is TRUE while the user is holding the mouse down.
+    // It becomes FALSE the exact millisecond they let go.
+    if (!marksSlider.getValueIsAdjusting()) {
+        // Only run the heavy database query when they finish dragging!
+        refreshStudentTable();
+    }
+    }//GEN-LAST:event_marksSliderStateChanged
+
+    private void searchBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchBtnActionPerformed
+        refreshStudentTable();
+    }//GEN-LAST:event_searchBtnActionPerformed
+
+    private void showAllBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showAllBtnActionPerformed
+        searchField.setText("");
+        marksSlider.setValue(0);
+        passingCheckBox.setSelected(false);
+        sortIdRadio.setSelected(true);
+        refreshStudentTable();
+    }//GEN-LAST:event_showAllBtnActionPerformed
+
+    private void searchFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_searchFieldKeyReleased
+        refreshStudentTable();
+    }//GEN-LAST:event_searchFieldKeyReleased
 
     /**
      * @param args the command line arguments
@@ -180,20 +346,118 @@ public class MainPage extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> new MainPage().setVisible(true));
     }
+    
+    private void refreshStudentTable() {
+    // 1. The JOIN Query: We stitch all three tables together!
+    // We use aliases (s, e, c) to make typing the table names shorter.
+    StringBuilder sql = new StringBuilder(
+        "SELECT s.student_id, s.name, s.email, c.course_name, e.mark " +
+        "FROM students s " +
+        "JOIN enrollments e ON s.student_id = e.student_id " +
+        "JOIN courses c ON e.course_id = c.course_id " +
+        "WHERE 1=1 "
+    );
+    
+    // 2. Read the Search Bar (Notice we have to specify WHICH table the column is in)
+    String keyword = searchField.getText().trim();
+    
+    if (!keyword.isEmpty()) {
+        // Find out what the user selected in the dropdown
+        String searchCategory = searchTypeComboBox.getSelectedItem().toString();
+        
+        // Append a specific SQL rule based on their choice
+        if (searchCategory.equals("Student Name")) {
+            sql.append("AND s.name LIKE '%").append(keyword).append("%' ");
+            
+        } else if (searchCategory.equals("Student ID")) {
+            sql.append("AND s.student_id LIKE '%").append(keyword).append("%' ");
+            
+        } else if (searchCategory.equals("Course")) {
+            sql.append("AND c.course_name LIKE '%").append(keyword).append("%' ");
+            
+        } else if (searchCategory.equals("Email")) {
+            sql.append("AND s.email LIKE '%").append(keyword).append("%' ");
+        }
+    }
+    
+    // 3. Read the JSlider
+    int minMarks = marksSlider.getValue();
+    if (minMarks > 0) {
+        sql.append("AND e.mark >= ").append(minMarks).append(" ");
+    }
+    
+    // 4. Read the JCheckBox
+    if (passingCheckBox.isSelected()) {
+        sql.append("AND e.mark >= 50 ");
+    }
+    
+    // 5. Read the JRadioButtons
+    if (sortNameRadio.isSelected()) {
+        sql.append("ORDER BY s.name ASC");
+    } else if (sortMarksRadio.isSelected()) {
+        sql.append("ORDER BY e.mark DESC"); 
+    } else {
+        sql.append("ORDER BY s.student_id ASC");
+    }
+
+    // 6. Execute the Query and Update the JTable
+    try (java.sql.Connection conn = database.DBConnection.getConnection();
+         java.sql.Statement stmt = conn.createStatement();
+         java.sql.ResultSet rs = stmt.executeQuery(sql.toString())) {
+         
+        javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) studentTable.getModel();
+        model.setRowCount(0); 
+        
+        while (rs.next()) {
+            model.addRow(new Object[]{
+                rs.getString("student_id"),
+                rs.getString("name"),
+                rs.getString("email"),
+                // Grab the joined columns!
+                rs.getString("course_name"), 
+                rs.getDouble("mark")          
+            });
+        }
+        
+        statusLabel.setText("System Ready. Data loaded successfully.");
+        statusLabel.setForeground(new java.awt.Color(0, 153, 51)); // Dark Green
+        
+    } catch (java.sql.SQLException ex) {
+        statusLabel.setText("Database error: " + ex.getMessage());
+        statusLabel.setForeground(java.awt.Color.RED);
+    }
+}
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel Searchlabel;
+    private javax.swing.JMenu aboutBtn;
     private javax.swing.JButton addBtn;
+    private javax.swing.ButtonGroup buttonGroup1;
     private javax.swing.JButton deleteBtn;
-    private javax.swing.JComboBox<String> jComboBox1;
+    private javax.swing.JMenuItem exitBtn;
+    private javax.swing.JMenu fileBtn;
+    private javax.swing.JMenu helpBtn;
+    private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel5;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JTabbedPane jTabbedPane1;
-    private javax.swing.JTable jTable2;
+    private javax.swing.JSlider marksSlider;
+    private javax.swing.JCheckBox passingCheckBox;
+    private javax.swing.JMenuItem printBtn;
     private javax.swing.JButton searchBtn;
     private javax.swing.JTextField searchField;
+    private javax.swing.JComboBox<String> searchTypeComboBox;
+    private javax.swing.JButton showAllBtn;
+    private javax.swing.JLabel sliderLabel;
+    private javax.swing.JRadioButton sortIdRadio;
+    private javax.swing.JRadioButton sortMarksRadio;
+    private javax.swing.JRadioButton sortNameRadio;
+    private javax.swing.JLabel statusLabel;
+    private javax.swing.JTable studentTable;
     private javax.swing.JButton updateBtn;
     // End of variables declaration//GEN-END:variables
 }
