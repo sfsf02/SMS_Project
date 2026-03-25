@@ -181,4 +181,43 @@ public class Course implements DatabaseOperations {
             System.err.println("Error searching courses: " + e.getMessage());
         }
     }
+    
+    public static String getIdByName(String courseName) {
+        String sql = "SELECT course_id FROM courses WHERE course_name = ?";
+        
+        try (java.sql.Connection conn = database.DBConnection.getConnection();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, courseName);
+            
+            try (java.sql.ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("course_id"); 
+                }
+            }
+        } catch (java.sql.SQLException e) {
+            System.err.println("Error looking up course ID: " + e.getMessage());
+        }
+        return null; // Returns null if no course is found
+    }
+    
+    public static java.util.ArrayList<String> getAllCourseNames() {
+        java.util.ArrayList<String> courseNames = new java.util.ArrayList<>();
+        // Sorting alphabetically is a standard UX best practice
+        String sql = "SELECT course_name FROM courses ORDER BY course_name ASC";
+        
+        try (java.sql.Connection conn = database.DBConnection.getConnection();
+             java.sql.Statement stmt = conn.createStatement();
+             java.sql.ResultSet rs = stmt.executeQuery(sql)) {
+            
+            while (rs.next()) {
+                courseNames.add(rs.getString("course_name"));
+            }
+            
+        } catch (java.sql.SQLException e) {
+            System.err.println("Error loading courses: " + e.getMessage());
+        }
+        
+        return courseNames;
+    }
 }

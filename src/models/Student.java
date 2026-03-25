@@ -105,23 +105,48 @@ public class Student extends Person implements DatabaseOperations {
 
     @Override
     public void add() {
-        String sql = "INSERT INTO students (student_id, name, email, course, marks) VALUES (?, ?, ?, ?, ?)";
-        
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            
-            pstmt.setString(1, this.id);
-            pstmt.setString(2, this.getName());
-            pstmt.setString(3, this.getEmail());
-            pstmt.setString(4, this.course);
-            pstmt.setDouble(5, this.marks);
-            pstmt.executeUpdate();
-            
+        String insertStudentSql = "INSERT INTO students (student_id, name, email) VALUES (?, ?, ?)";
+        // Assuming the user selects the course_id (like 'CSC101') from the dropdown
+        String insertEnrollmentSql = "INSERT INTO enrollments (student_id, course_id, mark) VALUES (?, ?, ?)";
+
+        java.sql.Connection conn = null;
+
+        try {
+            conn = database.DBConnection.getConnection();
+            // Start Transaction: Don't save permanently until BOTH queries succeed
+            conn.setAutoCommit(false); 
+
+            // 1. Insert into students table
+            try (java.sql.PreparedStatement pstmt1 = conn.prepareStatement(insertStudentSql)) {
+                pstmt1.setString(1, this.getId());
+                pstmt1.setString(2, this.getName());
+                pstmt1.setString(3, this.getEmail());
+                pstmt1.executeUpdate();
+            }
+
+            // 2. Insert into enrollments table
+            try (java.sql.PreparedStatement pstmt2 = conn.prepareStatement(insertEnrollmentSql)) {
+                pstmt2.setString(1, this.getId());
+                pstmt2.setString(2, this.getCourse()); // This needs to be the course_id (e.g., CSC101)
+                pstmt2.setDouble(3, this.getMarks());
+                pstmt2.executeUpdate();
+            }
+
+            // Both succeeded! Commit to the database.
+            conn.commit(); 
             this.syncOriginalId();
-            System.out.println("Student added: " + this.getName());
-            
-        } catch (SQLException e) {
-            System.err.println("Error adding student: " + e.getMessage());
+            System.out.println("SUCCESS: Student and Enrollment added for " + this.getName());
+
+        } catch (java.sql.SQLException e) {
+            // If anything fails, undo whatever was partially saved
+            if (conn != null) {
+                try { conn.rollback(); } catch (java.sql.SQLException ex) {}
+            }
+            throw new RuntimeException("Database error adding student: " + e.getMessage(), e);
+        } finally {
+            if (conn != null) {
+                try { conn.setAutoCommit(true); conn.close(); } catch (java.sql.SQLException ex) {}
+            }
         }
     }
 

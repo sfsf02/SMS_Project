@@ -268,7 +268,13 @@ public class MainPage extends javax.swing.JFrame {
     }//GEN-LAST:event_searchFieldActionPerformed
 
     private void addBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addBtnActionPerformed
-        // TODO add your handling code here:
+        // 1. Open the dialog
+        AddStudentDialog dialog = new AddStudentDialog(this, true);
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true); // The code pauses here until the dialog is closed!
+        
+        // 2. When the dialog closes, refresh the table so the new student appears instantly!
+        refreshStudentTable();
     }//GEN-LAST:event_addBtnActionPerformed
 
     private void searchTypeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchTypeComboBoxActionPerformed
