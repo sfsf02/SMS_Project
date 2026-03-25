@@ -11,12 +11,19 @@ public class DBConnection {
     // Database credentials (adjust these for MySQL or SQLite)
     private static final String URL = "jdbc:mysql://localhost:3306/sms_database";
     private static final String USER = "root";
-    private static final String PASSWORD = "your_db_password";
+    private static final String PASSWORD = "12345678";
 
     /**
      * Establishes the connection to the database.
      */
     public static Connection getConnection() throws SQLException {
+        try {
+        // This forces Java to check if the driver is actually in your classpath
+        Class.forName("com.mysql.cj.jdbc.Driver"); 
+    } catch (ClassNotFoundException e) {
+        System.err.println("MySQL Driver not found! Check  classpath.");
+        e.printStackTrace();
+    }
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 

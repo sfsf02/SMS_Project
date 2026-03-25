@@ -165,13 +165,73 @@ public class LoginPage extends javax.swing.JFrame {
     }//GEN-LAST:event_resetBtnActionPerformed
 
     private void loginBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginBtnActionPerformed
-        String user= usernameField.getText();
+
+        String user = usernameField.getText();
         String hashPass = utils.StringHelper.hashPassword(passwordField.getPassword());
-        System.out.println("Username: " + user);
-        System.out.println("Hashed Password: " + hashPass);
+
+        // 2. Start the progress bar and disable the login button
+        loginProgressBar.setIndeterminate(true);
+        loginBtn.setEnabled(false);
+        messageLabel.setText("Logging!");
+
+        // 3. Create the SwingWorker to do the heavy lifting in the background
+        javax.swing.SwingWorker<Boolean, Void> worker = new javax.swing.SwingWorker<Boolean, Void>() {
+
+            @Override
+            protected Boolean doInBackground() throws Exception {
+                // This runs in the background so the UI doesn't freeze
+                return database.DBConnection.validateLogin(user, hashPass);
+            }
+
+            @Override
+            protected void done() {
+                // This runs back on the UI thread when the database check is done
+
+                // Stop the progress bar animation and re-enable the button
+                loginProgressBar.setIndeterminate(false);
+                loginBtn.setEnabled(true);
+
+                try {
+                    boolean isLoginValid = get(); // Retrieves the result from doInBackground()
+
+                    if (isLoginValid) {
+                        // 1. Create and show the new Main Window
+                        MainPage mainApp = new MainPage();
+                        mainApp.setVisible(true);
+
+                        // 2. Destroy the current Login Window completely
+                        dispose(); // Since we are inside the JFrame class, just calling dispose() works
+                    } else {
+                        // Show an error message for wrong credentials
+                        javax.swing.JOptionPane.showMessageDialog(null, 
+                            "Invalid username or password.", "Login Failed", 
+                            javax.swing.JOptionPane.ERROR_MESSAGE);
+                        usernameField.setText("");
+                        passwordField.setText("");
+                        rememberMeCheck.setSelected(false); 
+                        messageLabel.setText("Invalid username or password.");
+                        loginProgressBar.setValue(0);
+                        usernameField.requestFocus(); // Puts the blinking cursor back in the username box!
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    javax.swing.JOptionPane.showMessageDialog(null, 
+                        "A database error occurred.", "Error", 
+                        javax.swing.JOptionPane.ERROR_MESSAGE);
+                    usernameField.setText("");
+                    passwordField.setText("");
+                    rememberMeCheck.setSelected(false); 
+                    messageLabel.setText("A database error occurred.");
+                    loginProgressBar.setValue(0);
+                    usernameField.requestFocus(); // Puts the blinking cursor back in the username box!
+                }
+            }
+        };
+
+        // 4. Actually start the background worker!
+        worker.execute();
         
 
-// TODO add your handling code here:
     }//GEN-LAST:event_loginBtnActionPerformed
 
     /**
