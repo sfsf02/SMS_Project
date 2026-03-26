@@ -255,4 +255,18 @@ public class Student extends Person implements DatabaseOperations {
         }
         return false;
     }
+    
+    public static void addGrade(String studentId, String courseId, double mark) throws java.sql.SQLException {
+        String sql = "INSERT INTO enrollments (student_id, course_id, mark) VALUES (?, ?, ?)";
+        
+        try (java.sql.Connection conn = database.DBConnection.getConnection();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             
+            pstmt.setString(1, studentId);
+            pstmt.setString(2, courseId);
+            pstmt.setDouble(3, mark);
+            
+            pstmt.executeUpdate();
+        }
+    }
 }

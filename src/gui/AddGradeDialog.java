@@ -159,16 +159,10 @@ public class AddGradeDialog extends javax.swing.JDialog {
             return; 
         }
 
-        // STEP 4: Database Insertion
-        String sql = "INSERT INTO enrollments (student_id, course_id, mark) VALUES (?, ?, ?)";
-        
-        try (java.sql.Connection conn = database.DBConnection.getConnection();
-             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
-             
-            pstmt.setString(1, this.currentStudentId);
-            pstmt.setString(2, courseId);
-            pstmt.setDouble(3, validMarks);
-            pstmt.executeUpdate();
+        // STEP 4: Database Insertion (Using the Model!)
+        try {
+            // We hand the clean, validated data directly to the backend
+            models.Student.addGrade(this.currentStudentId, courseId, validMarks);
 
             // Success! Show message and close the dialog
             javax.swing.JOptionPane.showMessageDialog(this, 
@@ -178,6 +172,7 @@ public class AddGradeDialog extends javax.swing.JDialog {
             this.dispose(); 
             
         } catch (java.sql.SQLException ex) {
+            // The backend caught an error and threw it here for the UI to display
             javax.swing.JOptionPane.showMessageDialog(this, 
                 "Database Error: " + ex.getMessage(), 
                 "Error", 
