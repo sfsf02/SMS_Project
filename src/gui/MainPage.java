@@ -31,11 +31,13 @@ public class MainPage extends javax.swing.JFrame {
                 if (studentTable.getSelectedRow() != -1) {
                     // A row is selected! Turn the button ON.
                     addGradeBtn.setEnabled(true);
+                    updateBtn.setEnabled(true);
                     addGradeBtn.setToolTipText("Click to enroll the selected student into a new course.");
                 } else {
                     // Nothing is selected! Turn the button OFF.
                     addGradeBtn.setEnabled(false);
                     addGradeBtn.setToolTipText("Select a student from the table first to enroll them.");
+                    updateBtn.setEnabled(false);
                 }
             }
         });
@@ -134,6 +136,8 @@ public class MainPage extends javax.swing.JFrame {
         jPanel3.add(addGradeBtn);
 
         updateBtn.setText("Update");
+        updateBtn.setEnabled(false);
+        updateBtn.addActionListener(this::updateBtnActionPerformed);
         jPanel3.add(updateBtn);
 
         deleteBtn.setText("Delete");
@@ -386,6 +390,29 @@ public class MainPage extends javax.swing.JFrame {
         refreshStudentTable(); 
     }
     }//GEN-LAST:event_addGradeBtnActionPerformed
+
+    private void updateBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateBtnActionPerformed
+        int selectedRow = studentTable.getSelectedRow();
+    
+        if (selectedRow != -1) {
+            // Grab EVERYTHING from the highlighted row
+            String id = studentTable.getValueAt(selectedRow, 0).toString();
+            String name = studentTable.getValueAt(selectedRow, 1).toString();
+            String email = studentTable.getValueAt(selectedRow, 2).toString();
+            String course = studentTable.getValueAt(selectedRow, 3).toString();
+            String mark = studentTable.getValueAt(selectedRow, 4).toString();
+
+            // Open the pop-up and hand it the data!
+            UpdateDialog dialog = new UpdateDialog(this, true, id, name, email, course, mark);
+            dialog.setLocationRelativeTo(this);
+            dialog.setVisible(true);
+
+            // Refresh the table when they are done
+            refreshStudentTable();
+        } else {
+            javax.swing.JOptionPane.showMessageDialog(this, "Please select a student from the table first.");
+        }
+    }//GEN-LAST:event_updateBtnActionPerformed
 
     /**
      * @param args the command line arguments

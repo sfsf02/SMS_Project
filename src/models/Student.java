@@ -173,29 +173,45 @@ public class Student extends Person implements DatabaseOperations {
 
     @Override
     public void update() {
-        String sql = "UPDATE students SET student_id = ?, name = ?, email = ?, course = ?, marks = ? WHERE student_id = ?";
+        String updateStudentSql = "UPDATE students SET name = ?, email = ? WHERE student_id = ?";
+        String updateEnrollmentSql = "UPDATE enrollments SET mark = ? WHERE student_id = ? AND course_id = ?";
         
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        java.sql.Connection conn = null;
+        try {
+            conn = database.DBConnection.getConnection();
+            conn.setAutoCommit(false); // Start transaction
             
-            pstmt.setString(1, this.id);
-            pstmt.setString(2, this.getName());
-            pstmt.setString(3, this.getEmail());
-            pstmt.setString(4, this.course);
-            pstmt.setDouble(5, this.marks);
-            pstmt.setString(6, this.originalId);
-            
-            int affectedRows = pstmt.executeUpdate();
-            
-            if (affectedRows > 0) {
-                this.syncOriginalId();
-                System.out.println("Student updated: " + this.id);
-            } else {
-                System.out.println("Update failed: Student not found");
+            // 1. Update personal info using the object's internal state
+            try (java.sql.PreparedStatement pstmt1 = conn.prepareStatement(updateStudentSql)) {
+                pstmt1.setString(1, this.getName());
+                pstmt1.setString(2, this.getEmail());
+                pstmt1.setString(3, this.getId());    // The WHERE clause
+                pstmt1.executeUpdate();
             }
             
-        } catch (SQLException e) {
-            System.err.println("Error updating student: " + e.getMessage());
+            // 2. Update the specific course mark
+            try (java.sql.PreparedStatement pstmt2 = conn.prepareStatement(updateEnrollmentSql)) {
+                pstmt2.setDouble(1, this.getMarks());
+                pstmt2.setString(2, this.getId());    // The WHERE clause
+                pstmt2.setString(3, this.getCourse());// The WHERE clause (course_id)
+                pstmt2.executeUpdate();
+            }
+            
+            // Both succeeded! Commit to the database.
+            conn.commit(); 
+            System.out.println("SUCCESS: Updated details for " + this.getName());
+            
+        } catch (java.sql.SQLException e) {
+            // Undo if anything fails
+            if (conn != null) {
+                try { conn.rollback(); } catch (java.sql.SQLException ex) {}
+            }
+            // Throw as a RuntimeException just like your add() method does
+            throw new RuntimeException("Database error updating student: " + e.getMessage(), e);
+        } finally {
+            if (conn != null) {
+                try { conn.setAutoCommit(true); conn.close(); } catch (java.sql.SQLException ex) {}
+            }
         }
     }
 
