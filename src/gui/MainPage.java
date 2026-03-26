@@ -32,15 +32,39 @@ public class MainPage extends javax.swing.JFrame {
                     // A row is selected! Turn the button ON.
                     addGradeBtn.setEnabled(true);
                     updateBtn.setEnabled(true);
-                    addGradeBtn.setToolTipText("Click to enroll the selected student into a new course.");
+                    deleteBtn.setEnabled(true);
+                    addGradeBtn.setToolTipText("Click to enroll the sele^cted student into a new course.");
+                    updateBtn.setToolTipText("Click to enroll the selected student into a new course.");
+                    deleteBtn.setToolTipText("Click to enroll the selected student into a new course.");
                 } else {
                     // Nothing is selected! Turn the button OFF.
                     addGradeBtn.setEnabled(false);
                     addGradeBtn.setToolTipText("Select a student from the table first to enroll them.");
                     updateBtn.setEnabled(false);
+                    deleteBtn.setEnabled(false);
+                    updateBtn.setToolTipText("Select a student from the table first to enroll them.");
+                    deleteBtn.setToolTipText("Select a student from the table first to enroll them.");
                 }
             }
         });
+        
+        myTabbedPane.addChangeListener(new javax.swing.event.ChangeListener() {
+        public void stateChanged(javax.swing.event.ChangeEvent evt) {
+            
+            int activeTab = myTabbedPane.getSelectedIndex();
+            
+            if (activeTab == 0) {
+                // User clicked the Student Tab
+                addGradeBtn.setVisible(true);  // Show the Add Grade button
+                statusLabel.setText("Status: Viewing Student Management.");
+            } else if (activeTab == 1) {
+                // User clicked the Course Tab
+                addGradeBtn.setVisible(false); // Hide the Add Grade button!
+                statusLabel.setText("Status: Viewing Course Management.");
+            }
+            
+        }
+    });
         
     }
 
@@ -54,18 +78,13 @@ public class MainPage extends javax.swing.JFrame {
     private void initComponents() {
 
         buttonGroup1 = new javax.swing.ButtonGroup();
-        jTabbedPane1 = new javax.swing.JTabbedPane();
+        myTabbedPane = new javax.swing.JTabbedPane();
         jPanel1 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         studentTable = new javax.swing.JTable();
         Searchlabel = new javax.swing.JLabel();
         searchField = new javax.swing.JTextField();
         searchBtn = new javax.swing.JButton();
-        jPanel3 = new javax.swing.JPanel();
-        addBtn = new javax.swing.JButton();
-        addGradeBtn = new javax.swing.JButton();
-        updateBtn = new javax.swing.JButton();
-        deleteBtn = new javax.swing.JButton();
         searchTypeComboBox = new javax.swing.JComboBox<>();
         sortIdRadio = new javax.swing.JRadioButton();
         sortNameRadio = new javax.swing.JRadioButton();
@@ -74,9 +93,14 @@ public class MainPage extends javax.swing.JFrame {
         marksSlider = new javax.swing.JSlider();
         sliderLabel = new javax.swing.JLabel();
         showAllBtn = new javax.swing.JButton();
+        jPanel2 = new javax.swing.JPanel();
+        jPanel3 = new javax.swing.JPanel();
+        addBtn = new javax.swing.JButton();
+        addGradeBtn = new javax.swing.JButton();
+        updateBtn = new javax.swing.JButton();
+        deleteBtn = new javax.swing.JButton();
         jPanel5 = new javax.swing.JPanel();
         statusLabel = new javax.swing.JLabel();
-        jPanel2 = new javax.swing.JPanel();
         jMenuBar1 = new javax.swing.JMenuBar();
         fileBtn = new javax.swing.JMenu();
         printBtn = new javax.swing.JMenuItem();
@@ -124,25 +148,6 @@ public class MainPage extends javax.swing.JFrame {
         searchBtn.setText("Search");
         searchBtn.addActionListener(this::searchBtnActionPerformed);
 
-        jPanel3.setLayout(new java.awt.GridLayout(1, 0));
-
-        addBtn.setText("Add");
-        addBtn.addActionListener(this::addBtnActionPerformed);
-        jPanel3.add(addBtn);
-
-        addGradeBtn.setText("Add Grade");
-        addGradeBtn.setEnabled(false);
-        addGradeBtn.addActionListener(this::addGradeBtnActionPerformed);
-        jPanel3.add(addGradeBtn);
-
-        updateBtn.setText("Update");
-        updateBtn.setEnabled(false);
-        updateBtn.addActionListener(this::updateBtnActionPerformed);
-        jPanel3.add(updateBtn);
-
-        deleteBtn.setText("Delete");
-        jPanel3.add(deleteBtn);
-
         searchTypeComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Student ID", "Student Name", "Course" }));
         searchTypeComboBox.addActionListener(this::searchTypeComboBoxActionPerformed);
 
@@ -173,23 +178,6 @@ public class MainPage extends javax.swing.JFrame {
         showAllBtn.setText("All Student");
         showAllBtn.addActionListener(this::showAllBtnActionPerformed);
 
-        statusLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        statusLabel.setText("System Ready.");
-
-        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
-        jPanel5.setLayout(jPanel5Layout);
-        jPanel5Layout.setHorizontalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(statusLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-        jPanel5Layout.setVerticalGroup(
-            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel5Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(statusLabel)
-                .addContainerGap(170, Short.MAX_VALUE))
-        );
-
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -197,7 +185,7 @@ public class MainPage extends javax.swing.JFrame {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 1104, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(35, 35, 35)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -223,13 +211,8 @@ public class MainPage extends javax.swing.JFrame {
                                 .addComponent(marksSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 352, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jPanel5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, jPanel1Layout.createSequentialGroup()
-                                .addComponent(Searchlabel)
-                                .addGap(0, 0, Short.MAX_VALUE))
-                            .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addContainerGap())))
+                        .addComponent(Searchlabel)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -252,14 +235,10 @@ public class MainPage extends javax.swing.JFrame {
                     .addComponent(sliderLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 501, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                .addContainerGap(15, Short.MAX_VALUE))
         );
 
-        jTabbedPane1.addTab("Student", jPanel1);
+        myTabbedPane.addTab("Student", jPanel1);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -269,12 +248,54 @@ public class MainPage extends javax.swing.JFrame {
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 865, Short.MAX_VALUE)
+            .addGap(0, 629, Short.MAX_VALUE)
         );
 
-        jTabbedPane1.addTab("Course Mangement", jPanel2);
+        myTabbedPane.addTab("Course Mangement", jPanel2);
 
-        getContentPane().add(jTabbedPane1, java.awt.BorderLayout.PAGE_START);
+        getContentPane().add(myTabbedPane, java.awt.BorderLayout.CENTER);
+
+        jPanel3.setLayout(new java.awt.GridLayout(1, 0));
+
+        addBtn.setText("Add");
+        addBtn.addActionListener(this::addBtnActionPerformed);
+        jPanel3.add(addBtn);
+
+        addGradeBtn.setText("Add Grade");
+        addGradeBtn.setEnabled(false);
+        addGradeBtn.addActionListener(this::addGradeBtnActionPerformed);
+        jPanel3.add(addGradeBtn);
+
+        updateBtn.setText("Update");
+        updateBtn.setEnabled(false);
+        updateBtn.addActionListener(this::updateBtnActionPerformed);
+        jPanel3.add(updateBtn);
+
+        deleteBtn.setText("Delete");
+        deleteBtn.setEnabled(false);
+        deleteBtn.addActionListener(this::deleteBtnActionPerformed);
+        jPanel3.add(deleteBtn);
+
+        getContentPane().add(jPanel3, java.awt.BorderLayout.SOUTH);
+
+        statusLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        statusLabel.setText("System Ready.");
+
+        javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
+        jPanel5.setLayout(jPanel5Layout);
+        jPanel5Layout.setHorizontalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(statusLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+        );
+        jPanel5Layout.setVerticalGroup(
+            jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel5Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(statusLabel)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        getContentPane().add(jPanel5, java.awt.BorderLayout.NORTH);
 
         fileBtn.setText("File");
 
@@ -305,13 +326,25 @@ public class MainPage extends javax.swing.JFrame {
     }//GEN-LAST:event_searchFieldActionPerformed
 
     private void addBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addBtnActionPerformed
-        // 1. Open the dialog
+        // Ask the TabbedPane which tab the user is currently looking at
+        int currentTab = myTabbedPane.getSelectedIndex();
+        if (currentTab == 0) {
+        // --- STUDENT TAB LOGIC ---
         AddStudentDialog dialog = new AddStudentDialog(this, true);
         dialog.setLocationRelativeTo(this);
-        dialog.setVisible(true); // The code pauses here until the dialog is closed!
-        
-        // 2. When the dialog closes, refresh the table so the new student appears instantly!
-        refreshStudentTable();
+        dialog.setVisible(true);
+        refreshStudentTable(); 
+        statusLabel.setText("Status: Student added successfully.");
+
+    } else if (currentTab == 1) {
+        // --- COURSE TAB LOGIC ---
+        // You will build this dialog next!
+        AddCourseDialog dialog = new AddCourseDialog(this, true); 
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
+        refreshCourseTable(); 
+        statusLabel.setText("Status: Course added successfully.");
+    }
     }//GEN-LAST:event_addBtnActionPerformed
 
     private void searchTypeComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchTypeComboBoxActionPerformed
@@ -413,6 +446,63 @@ public class MainPage extends javax.swing.JFrame {
             javax.swing.JOptionPane.showMessageDialog(this, "Please select a student from the table first.");
         }
     }//GEN-LAST:event_updateBtnActionPerformed
+
+    private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
+        int selectedRow = studentTable.getSelectedRow();
+    
+        if (selectedRow != -1) {
+            // 1. Grab the necessary data from the table
+            String studentId = studentTable.getValueAt(selectedRow, 0).toString();
+            String studentName = studentTable.getValueAt(selectedRow, 1).toString();
+            String courseName = studentTable.getValueAt(selectedRow, 3).toString();
+
+            // 2. Defensive UI: The Confirmation Dialog
+            int confirm = javax.swing.JOptionPane.showConfirmDialog(this, 
+                "Are you sure you want to completely remove the grade for " + studentName + " in " + courseName + "?\n\nThis action cannot be undone.", 
+                "Confirm Delete", 
+                javax.swing.JOptionPane.YES_NO_OPTION, 
+                javax.swing.JOptionPane.WARNING_MESSAGE);
+
+            // 3. If they click "Yes"
+            if (confirm == javax.swing.JOptionPane.YES_OPTION) {
+                try {
+                    // Translate the friendly name ("Cybersecurity 101") back to the ID ("CYB201")
+                    String courseId = models.Course.getIdByName(courseName);
+
+                    if (courseId == null) {
+                        throw new RuntimeException("System error: Could not resolve Course ID.");
+                    }
+
+                    // Pack the DTO Suitcase
+                    models.Student studentToDelete = new models.Student();
+                    studentToDelete.setId(studentId);
+                    studentToDelete.setCourse(courseId);
+
+                    // Execute the backend deletion
+                    studentToDelete.deleteEnrollment();
+
+                    // Success! Refresh the table instantly
+                    javax.swing.JOptionPane.showMessageDialog(this, 
+                        "Record deleted successfully.", 
+                        "Deleted", 
+                        javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                    refreshStudentTable();
+
+                } catch (RuntimeException ex) {
+                    javax.swing.JOptionPane.showMessageDialog(this, 
+                        ex.getMessage(), 
+                        "Delete Failed", 
+                        javax.swing.JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        } else {
+            // If they click Delete without highlighting a row first
+            javax.swing.JOptionPane.showMessageDialog(this, 
+                "Please select a record from the table to delete.", 
+                "Select a Record", 
+                javax.swing.JOptionPane.INFORMATION_MESSAGE);
+        }
+    }//GEN-LAST:event_deleteBtnActionPerformed
 
     /**
      * @param args the command line arguments
@@ -537,8 +627,8 @@ public class MainPage extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel5;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JPopupMenu.Separator jSeparator1;
-    private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JSlider marksSlider;
+    private javax.swing.JTabbedPane myTabbedPane;
     private javax.swing.JCheckBox passingCheckBox;
     private javax.swing.JMenuItem printBtn;
     private javax.swing.JButton searchBtn;

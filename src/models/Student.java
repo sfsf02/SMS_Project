@@ -285,4 +285,26 @@ public class Student extends Person implements DatabaseOperations {
             pstmt.executeUpdate();
         }
     }
+    public void deleteEnrollment() {
+        // We strictly target the enrollments table, NOT the students table!
+        String sql = "DELETE FROM enrollments WHERE student_id = ? AND course_id = ?";
+        
+        try (java.sql.Connection conn = database.DBConnection.getConnection();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             
+            pstmt.setString(1, this.getId());
+            pstmt.setString(2, this.getCourse()); // This will hold the translated course_id
+            
+            int rowsAffected = pstmt.executeUpdate();
+            
+            if (rowsAffected == 0) {
+                throw new RuntimeException("No record found to delete. It may have already been removed.");
+            }
+            
+            System.out.println("SUCCESS: Deleted enrollment for " + this.getId());
+            
+        } catch (java.sql.SQLException e) {
+            throw new RuntimeException("Database error deleting record: " + e.getMessage(), e);
+        }
+    }
 }
