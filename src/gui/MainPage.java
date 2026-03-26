@@ -141,11 +141,11 @@ public class MainPage extends javax.swing.JFrame {
         statusLabel = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         fileBtn = new javax.swing.JMenu();
-        printBtn = new javax.swing.JMenuItem();
+        aboutBtn = new javax.swing.JMenuItem();
+        jSeparator2 = new javax.swing.JPopupMenu.Separator();
+        logoutBtn = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
         exitBtn = new javax.swing.JMenuItem();
-        aboutBtn = new javax.swing.JMenu();
-        helpBtn = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(30, 30, 30));
@@ -229,31 +229,31 @@ public class MainPage extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane2)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(35, 35, 35)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(searchTypeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(searchField, javax.swing.GroupLayout.PREFERRED_SIZE, 390, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(47, 47, 47)
-                                .addComponent(searchBtn)
-                                .addGap(18, 18, 18)
-                                .addComponent(showAllBtn))
-                            .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(sortIdRadio)
-                                .addGap(18, 18, 18)
-                                .addComponent(sortNameRadio)
-                                .addGap(18, 18, 18)
-                                .addComponent(sortMarksRadio)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(passingCheckBox, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(sliderLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(marksSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 352, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                        .addComponent(Searchlabel)
+                                .addGap(35, 35, 35)
+                                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(searchTypeComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 126, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(searchField, javax.swing.GroupLayout.PREFERRED_SIZE, 390, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addGap(47, 47, 47)
+                                        .addComponent(searchBtn)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(showAllBtn))
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(sortIdRadio)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(sortNameRadio)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(sortMarksRadio)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(passingCheckBox, javax.swing.GroupLayout.PREFERRED_SIZE, 172, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(sliderLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(marksSlider, javax.swing.GroupLayout.PREFERRED_SIZE, 352, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addComponent(Searchlabel))
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
         jPanel1Layout.setVerticalGroup(
@@ -418,9 +418,14 @@ public class MainPage extends javax.swing.JFrame {
 
         fileBtn.setText("File");
 
-        printBtn.setText("print");
-        printBtn.addActionListener(this::printBtnActionPerformed);
-        fileBtn.add(printBtn);
+        aboutBtn.setText("About");
+        aboutBtn.addActionListener(this::aboutBtnActionPerformed);
+        fileBtn.add(aboutBtn);
+        fileBtn.add(jSeparator2);
+
+        logoutBtn.setText("Logout");
+        logoutBtn.addActionListener(this::logoutBtnActionPerformed);
+        fileBtn.add(logoutBtn);
         fileBtn.add(jSeparator1);
 
         exitBtn.setText("Exit");
@@ -428,12 +433,6 @@ public class MainPage extends javax.swing.JFrame {
         fileBtn.add(exitBtn);
 
         jMenuBar1.add(fileBtn);
-
-        aboutBtn.setText("about");
-        jMenuBar1.add(aboutBtn);
-
-        helpBtn.setText("help");
-        jMenuBar1.add(helpBtn);
 
         setJMenuBar(jMenuBar1);
 
@@ -471,12 +470,8 @@ public class MainPage extends javax.swing.JFrame {
     }//GEN-LAST:event_searchTypeComboBoxActionPerformed
 
     private void exitBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitBtnActionPerformed
-        // TODO add your handling code here:
+        System.exit(0);
     }//GEN-LAST:event_exitBtnActionPerformed
-
-    private void printBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_printBtnActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_printBtnActionPerformed
 
     private void sortNameRadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sortNameRadioActionPerformed
         refreshTable();
@@ -697,6 +692,44 @@ public class MainPage extends javax.swing.JFrame {
         refreshTable();
     }//GEN-LAST:event_showAllBtn1ActionPerformed
 
+    private void logoutBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logoutBtnActionPerformed
+        // 1. Defensive UI: Ask for confirmation
+        int confirm = javax.swing.JOptionPane.showConfirmDialog(this, 
+            "Are you sure you want to log out?", 
+            "Confirm Logout", 
+            javax.swing.JOptionPane.YES_NO_OPTION, 
+            javax.swing.JOptionPane.QUESTION_MESSAGE);
+
+        // 2. If they click "Yes"
+        if (confirm == javax.swing.JOptionPane.YES_OPTION) {
+            // Close the current MainPage
+            this.dispose(); 
+
+            // Open a fresh Login Page
+            java.awt.EventQueue.invokeLater(() -> {
+                new LoginPage().setVisible(true);
+            });
+        }
+    }//GEN-LAST:event_logoutBtnActionPerformed
+
+    private void aboutBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aboutBtnActionPerformed
+        // 1. Format the multi-line message
+    String aboutMessage = """
+                          Student Management System (SMS)
+                          
+                          A university school project for the College of Science and Technology.
+                          
+                          
+                          GitHub Repository:
+                          https://github.com/your-username/your-repo-name""";
+
+    // 2. Show the pop-up dialog
+    javax.swing.JOptionPane.showMessageDialog(this, 
+        aboutMessage, 
+        "About This Application", 
+        javax.swing.JOptionPane.INFORMATION_MESSAGE);
+    }//GEN-LAST:event_aboutBtnActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -754,7 +787,7 @@ public class MainPage extends javax.swing.JFrame {
                 String keyword = searchField1.getText().trim();
                 boolean sortByName = sortNameRadio1.isSelected();
                 
-                // Ask Course model for data
+                // Ask Course model for data^
                 java.util.ArrayList<String[]> data = models.Course.getData(keyword, sortByName);
                 
                 // Paint Course Table
@@ -770,7 +803,7 @@ public class MainPage extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel Searchlabel;
     private javax.swing.JLabel Searchlabel1;
-    private javax.swing.JMenu aboutBtn;
+    private javax.swing.JMenuItem aboutBtn;
     private javax.swing.JButton addBtn;
     private javax.swing.JButton addGradeBtn;
     private javax.swing.ButtonGroup buttonGroup1;
@@ -778,7 +811,6 @@ public class MainPage extends javax.swing.JFrame {
     private javax.swing.JButton deleteBtn;
     private javax.swing.JMenuItem exitBtn;
     private javax.swing.JMenu fileBtn;
-    private javax.swing.JMenu helpBtn;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
@@ -787,10 +819,11 @@ public class MainPage extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JPopupMenu.Separator jSeparator1;
+    private javax.swing.JPopupMenu.Separator jSeparator2;
+    private javax.swing.JMenuItem logoutBtn;
     private javax.swing.JSlider marksSlider;
     private javax.swing.JTabbedPane myTabbedPane;
     private javax.swing.JCheckBox passingCheckBox;
-    private javax.swing.JMenuItem printBtn;
     private javax.swing.JButton searchBtn;
     private javax.swing.JButton searchBtn1;
     private javax.swing.JTextField searchField;

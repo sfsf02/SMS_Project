@@ -18,6 +18,7 @@ public class LoginPage extends javax.swing.JFrame {
     public LoginPage() {
         initComponents();
         this.setLocationRelativeTo(null); // Centers the window on the screen
+        this.getRootPane().setDefaultButton(loginBtn);
     }
 
     /**
@@ -35,7 +36,6 @@ public class LoginPage extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         usernameField = new javax.swing.JTextField();
         passwordField = new javax.swing.JPasswordField();
-        rememberMeCheck = new javax.swing.JCheckBox();
         loginBtn = new javax.swing.JButton();
         resetBtn = new javax.swing.JButton();
         loginProgressBar = new javax.swing.JProgressBar();
@@ -75,9 +75,7 @@ public class LoginPage extends javax.swing.JFrame {
 
         usernameField.addActionListener(this::usernameFieldActionPerformed);
 
-        rememberMeCheck.setBackground(new java.awt.Color(45, 45, 45));
-        rememberMeCheck.setForeground(new java.awt.Color(255, 255, 255));
-        rememberMeCheck.setText("Remember Me");
+        passwordField.addActionListener(this::passwordFieldActionPerformed);
 
         loginBtn.setBackground(new java.awt.Color(21, 46, 255));
         loginBtn.setText("Login");
@@ -106,9 +104,7 @@ public class LoginPage extends javax.swing.JFrame {
                                     .addComponent(passwordField, javax.swing.GroupLayout.DEFAULT_SIZE, 263, Short.MAX_VALUE)))
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(25, 25, 25)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(rememberMeCheck, javax.swing.GroupLayout.DEFAULT_SIZE, 114, Short.MAX_VALUE)
-                                    .addComponent(messageLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                                .addComponent(messageLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 114, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addContainerGap()
@@ -133,17 +129,12 @@ public class LoginPage extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(passwordField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                .addGap(18, 54, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(rememberMeCheck)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 39, Short.MAX_VALUE)
-                        .addComponent(messageLabel))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(loginBtn)
-                            .addComponent(resetBtn))))
+                    .addComponent(messageLabel, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(loginBtn)
+                        .addComponent(resetBtn)))
                 .addGap(5, 5, 5)
                 .addComponent(loginProgressBar, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
@@ -153,28 +144,40 @@ public class LoginPage extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void usernameFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_usernameFieldActionPerformed
-        // TODO add your handling code here:
+        loginBtn.doClick();
     }//GEN-LAST:event_usernameFieldActionPerformed
 
     private void resetBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetBtnActionPerformed
         usernameField.setText("");
         passwordField.setText("");
-        rememberMeCheck.setSelected(false); 
         messageLabel.setText("");
         loginProgressBar.setValue(0);
     }//GEN-LAST:event_resetBtnActionPerformed
 
     private void loginBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginBtnActionPerformed
 
-        String user = usernameField.getText();
-        String hashPass = utils.StringHelper.hashPassword(passwordField.getPassword());
+        // 1. Grab the RAW data first
+        String user = usernameField.getText().trim();
+        char[] rawPassword = passwordField.getPassword();
 
-        // 2. Start the progress bar and disable the login button
+        // 2. VALIDATE FIRST! (Before you lock the UI)
+        if (user.isEmpty() || rawPassword.length == 0) {
+            javax.swing.JOptionPane.showMessageDialog(this, 
+                "Please enter both a Username and a Password.", 
+                "Missing Information", 
+                javax.swing.JOptionPane.WARNING_MESSAGE);
+            return; // Stop the code right here, safely!
+        }
+
+        // 3. Now that we know it's not empty, it is safe to hash it
+        String hashPass = utils.StringHelper.hashPassword(rawPassword);
+
+        // 4. Lock the UI and start animations
         loginProgressBar.setIndeterminate(true);
         loginBtn.setEnabled(false);
-        messageLabel.setText("Logging!");
-
-        // 3. Create the SwingWorker to do the heavy lifting in the background
+        messageLabel.setText("Logging in...");
+        
+        // 5. Create the SwingWorker to do the heavy lifting in the background
         javax.swing.SwingWorker<Boolean, Void> worker = new javax.swing.SwingWorker<Boolean, Void>() {
 
             @Override
@@ -195,44 +198,49 @@ public class LoginPage extends javax.swing.JFrame {
                     boolean isLoginValid = get(); // Retrieves the result from doInBackground()
 
                     if (isLoginValid) {
-                        // 1. Create and show the new Main Window
+                        // Create and show the new Main Window
                         MainPage mainApp = new MainPage();
                         mainApp.setVisible(true);
 
-                        // 2. Destroy the current Login Window completely
-                        dispose(); // Since we are inside the JFrame class, just calling dispose() works
+                        // Destroy the current Login Window completely
+                        dispose(); 
                     } else {
                         // Show an error message for wrong credentials
                         javax.swing.JOptionPane.showMessageDialog(null, 
                             "Invalid username or password.", "Login Failed", 
                             javax.swing.JOptionPane.ERROR_MESSAGE);
+                        
+                        // Reset the UI for another try
                         usernameField.setText("");
-                        passwordField.setText("");
-                        rememberMeCheck.setSelected(false); 
+                        passwordField.setText(""); 
                         messageLabel.setText("Invalid username or password.");
                         loginProgressBar.setValue(0);
-                        usernameField.requestFocus(); // Puts the blinking cursor back in the username box!
+                        usernameField.requestFocus(); // Put cursor back!
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                     javax.swing.JOptionPane.showMessageDialog(null, 
                         "A database error occurred.", "Error", 
                         javax.swing.JOptionPane.ERROR_MESSAGE);
+                        
+                    // Reset the UI after an error
                     usernameField.setText("");
                     passwordField.setText("");
-                    rememberMeCheck.setSelected(false); 
                     messageLabel.setText("A database error occurred.");
                     loginProgressBar.setValue(0);
-                    usernameField.requestFocus(); // Puts the blinking cursor back in the username box!
+                    usernameField.requestFocus(); 
                 }
             }
         };
 
-        // 4. Actually start the background worker!
+        // 6. Actually start the background worker!
         worker.execute();
-        
 
     }//GEN-LAST:event_loginBtnActionPerformed
+
+    private void passwordFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_passwordFieldActionPerformed
+        loginBtn.doClick();
+    }//GEN-LAST:event_passwordFieldActionPerformed
 
     /**
      * @param args the command line arguments
@@ -268,7 +276,6 @@ public class LoginPage extends javax.swing.JFrame {
     private javax.swing.JProgressBar loginProgressBar;
     private javax.swing.JLabel messageLabel;
     private javax.swing.JPasswordField passwordField;
-    private javax.swing.JCheckBox rememberMeCheck;
     private javax.swing.JButton resetBtn;
     private javax.swing.JTextField usernameField;
     // End of variables declaration//GEN-END:variables
