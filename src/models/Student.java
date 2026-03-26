@@ -215,44 +215,58 @@ public class Student extends Person implements DatabaseOperations {
         }
     }
 
-    @Override
-    public void search(String keyword) {
-        String sql = "SELECT * FROM students WHERE student_id LIKE ? OR name LIKE ? OR email LIKE ? OR course LIKE ?";
+    
+    public static java.util.ArrayList<Object[]> getData(String keyword, String sortBy, double minMarks) {
+        java.util.ArrayList<Object[]> studentList = new java.util.ArrayList<>();
         
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        // 1. The core JOIN query to get data from all 3 tables
+        StringBuilder sql = new StringBuilder(
+            "SELECT s.student_id, s.name, s.email, c.course_name, e.mark " +
+            "FROM students s " +
+            "JOIN enrollments e ON s.student_id = e.student_id " +
+            "JOIN courses c ON e.course_id = c.course_id " +
+            "WHERE (s.student_id LIKE ? OR s.name LIKE ? OR s.email LIKE ? OR c.course_name LIKE ?) " +
+            "AND e.mark >= ?"
+        );
+        
+        // 2. Add the dynamic sorting
+        if (sortBy.equals("NAME")) {
+            sql.append(" ORDER BY s.name ASC");
+        } else if (sortBy.equals("MARKS")) {
+            sql.append(" ORDER BY e.mark DESC");
+        } else {
+            sql.append(" ORDER BY s.student_id ASC");
+        }
+        
+        try (java.sql.Connection conn = database.DBConnection.getConnection();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql.toString())) {
             
+            // 3. Fill in the ? placeholders
             String searchPattern = "%" + keyword + "%";
             pstmt.setString(1, searchPattern);
             pstmt.setString(2, searchPattern);
             pstmt.setString(3, searchPattern);
             pstmt.setString(4, searchPattern);
+            pstmt.setDouble(5, minMarks); // From the slider or passing checkbox
             
-            ResultSet rs = pstmt.executeQuery();
-            int matchCount = 0;
-            
-            System.out.println("Search Results for: " + keyword);
-            System.out.println("----------------------------------------");
-            
-            while (rs.next()) {
-                matchCount++;
-                System.out.println("ID: " + rs.getString("student_id"));
-                System.out.println("Name: " + rs.getString("name"));
-                System.out.println("Email: " + rs.getString("email"));
-                System.out.println("Course: " + rs.getString("course"));
-                System.out.println("Marks: " + rs.getDouble("marks"));
-                System.out.println("----------------------------------------");
+            try (java.sql.ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    // 4. Package each row as an Object array
+                    Object[] row = new Object[5];
+                    row[0] = rs.getString("student_id");
+                    row[1] = rs.getString("name");
+                    row[2] = rs.getString("email");
+                    row[3] = rs.getString("course_name");
+                    row[4] = rs.getDouble("mark");
+                    
+                    studentList.add(row);
+                }
             }
-            
-            if (matchCount == 0) {
-                System.out.println("No students found for: " + keyword);
-            } else {
-                System.out.println("Total found: " + matchCount);
-            }
-            
-        } catch (SQLException e) {
-            System.err.println("Error searching students: " + e.getMessage());
+        } catch (java.sql.SQLException e) {
+            System.err.println("Error loading student table: " + e.getMessage());
         }
+        
+        return studentList;
     }
     
     public static boolean checkEnrollmentExists(String studentId, String courseId) {

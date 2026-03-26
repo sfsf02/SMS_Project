@@ -21,50 +21,80 @@ public class MainPage extends javax.swing.JFrame {
         this.setLocationRelativeTo(null); 
         
         // NEW: Load the data immediately when the app opens!
-        refreshStudentTable();
+        refreshTable();
         // This watches the table to see if a row is highlighted
+        // ==========================================
+        // 1. STUDENT TABLE LISTENER
+        // ==========================================
         studentTable.getSelectionModel().addListSelectionListener((javax.swing.event.ListSelectionEvent event) -> {
-            // Ignore extra events while the user is dragging their mouse
             if (!event.getValueIsAdjusting()) {
-                
-                // .getSelectedRow() returns -1 if absolutely nothing is clicked
                 if (studentTable.getSelectedRow() != -1) {
-                    // A row is selected! Turn the button ON.
                     addGradeBtn.setEnabled(true);
                     updateBtn.setEnabled(true);
                     deleteBtn.setEnabled(true);
-                    addGradeBtn.setToolTipText("Click to enroll the sele^cted student into a new course.");
-                    updateBtn.setToolTipText("Click to enroll the selected student into a new course.");
-                    deleteBtn.setToolTipText("Click to enroll the selected student into a new course.");
+                    
+                    addGradeBtn.setToolTipText("Click to enroll this student into a new course.");
+                    updateBtn.setToolTipText("Click to update this student's details.");
+                    deleteBtn.setToolTipText("Click to completely delete this enrollment record.");
                 } else {
-                    // Nothing is selected! Turn the button OFF.
                     addGradeBtn.setEnabled(false);
-                    addGradeBtn.setToolTipText("Select a student from the table first to enroll them.");
                     updateBtn.setEnabled(false);
                     deleteBtn.setEnabled(false);
-                    updateBtn.setToolTipText("Select a student from the table first to enroll them.");
-                    deleteBtn.setToolTipText("Select a student from the table first to enroll them.");
+                    
+                    addGradeBtn.setToolTipText("Select a student from the table first.");
+                    updateBtn.setToolTipText("Select a student from the table first.");
+                    deleteBtn.setToolTipText("Select a student from the table first.");
+                }
+            }
+        });
+
+        // ==========================================
+        // 2. COURSE TABLE LISTENER
+        // ==========================================
+        courseTable.getSelectionModel().addListSelectionListener((javax.swing.event.ListSelectionEvent event) -> {
+            if (!event.getValueIsAdjusting()) {
+                
+                // FIXED: Now checks the courseTable!
+                if (courseTable.getSelectedRow() != -1) { 
+                    updateBtn.setEnabled(true);
+                    deleteBtn.setEnabled(true);
+                    
+                    // FIXED: Course-specific tooltips
+                    updateBtn.setToolTipText("Click to update this course's name.");
+                    deleteBtn.setToolTipText("Click to delete this course.");
+                } else {
+                    updateBtn.setEnabled(false);
+                    deleteBtn.setEnabled(false);
+                    
+                    updateBtn.setToolTipText("Select a course from the table first.");
+                    deleteBtn.setToolTipText("Select a course from the table first.");
                 }
             }
         });
         
-        myTabbedPane.addChangeListener(new javax.swing.event.ChangeListener() {
-        public void stateChanged(javax.swing.event.ChangeEvent evt) {
-            
+        // ==========================================
+        // 3. TABBED PANE LISTENER
+        // ==========================================
+        myTabbedPane.addChangeListener((javax.swing.event.ChangeEvent evt) -> {
             int activeTab = myTabbedPane.getSelectedIndex();
+            
+            // PRO-TIP: Reset all buttons to OFF when switching tabs for safety
+            addGradeBtn.setEnabled(false);
+            updateBtn.setEnabled(false);
+            deleteBtn.setEnabled(false);
             
             if (activeTab == 0) {
                 // User clicked the Student Tab
-                addGradeBtn.setVisible(true);  // Show the Add Grade button
+                addGradeBtn.setVisible(true);  
                 statusLabel.setText("Status: Viewing Student Management.");
             } else if (activeTab == 1) {
                 // User clicked the Course Tab
-                addGradeBtn.setVisible(false); // Hide the Add Grade button!
+                addGradeBtn.setVisible(false); 
                 statusLabel.setText("Status: Viewing Course Management.");
             }
             
-        }
-    });
+            refreshTable();
+        });
         
     }
 
@@ -94,6 +124,14 @@ public class MainPage extends javax.swing.JFrame {
         sliderLabel = new javax.swing.JLabel();
         showAllBtn = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        courseTable = new javax.swing.JTable();
+        Searchlabel1 = new javax.swing.JLabel();
+        searchField1 = new javax.swing.JTextField();
+        searchBtn1 = new javax.swing.JButton();
+        sortIdRadio1 = new javax.swing.JRadioButton();
+        sortNameRadio1 = new javax.swing.JRadioButton();
+        showAllBtn1 = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         addBtn = new javax.swing.JButton();
         addGradeBtn = new javax.swing.JButton();
@@ -135,6 +173,11 @@ public class MainPage extends javax.swing.JFrame {
             }
         });
         jScrollPane2.setViewportView(studentTable);
+        if (studentTable.getColumnModel().getColumnCount() > 0) {
+            studentTable.getColumnModel().getColumn(2).setHeaderValue("Email");
+            studentTable.getColumnModel().getColumn(3).setHeaderValue("Course");
+            studentTable.getColumnModel().getColumn(4).setHeaderValue("Mark");
+        }
 
         Searchlabel.setText("Search by:");
 
@@ -152,7 +195,6 @@ public class MainPage extends javax.swing.JFrame {
         searchTypeComboBox.addActionListener(this::searchTypeComboBoxActionPerformed);
 
         buttonGroup1.add(sortIdRadio);
-        sortIdRadio.setSelected(true);
         sortIdRadio.setText("Sort by ID");
         sortIdRadio.addActionListener(this::sortIdRadioActionPerformed);
 
@@ -235,27 +277,104 @@ public class MainPage extends javax.swing.JFrame {
                     .addComponent(sliderLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 501, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(15, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         myTabbedPane.addTab("Student", jPanel1);
+
+        courseTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null},
+                {null, null},
+                {null, null},
+                {null, null}
+            },
+            new String [] {
+                "Course ID", "Name"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane3.setViewportView(courseTable);
+
+        Searchlabel1.setText("Search by name:");
+
+        searchField1.addActionListener(this::searchField1ActionPerformed);
+        searchField1.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                searchField1KeyReleased(evt);
+            }
+        });
+
+        searchBtn1.setText("Search");
+        searchBtn1.addActionListener(this::searchBtn1ActionPerformed);
+
+        buttonGroup1.add(sortIdRadio1);
+        sortIdRadio1.setSelected(true);
+        sortIdRadio1.setText("Sort by ID");
+        sortIdRadio1.addActionListener(this::sortIdRadio1ActionPerformed);
+
+        buttonGroup1.add(sortNameRadio1);
+        sortNameRadio1.setText("Sort by Name");
+        sortNameRadio1.addActionListener(this::sortNameRadio1ActionPerformed);
+
+        showAllBtn1.setText("All Course");
+        showAllBtn1.addActionListener(this::showAllBtn1ActionPerformed);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1110, Short.MAX_VALUE)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane3)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addGap(35, 35, 35)
+                                .addComponent(sortIdRadio1)
+                                .addGap(18, 18, 18)
+                                .addComponent(sortNameRadio1))
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(Searchlabel1)
+                                .addGap(34, 34, 34)
+                                .addComponent(searchField1, javax.swing.GroupLayout.PREFERRED_SIZE, 390, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(52, 52, 52)
+                                .addComponent(searchBtn1)
+                                .addGap(59, 59, 59)
+                                .addComponent(showAllBtn1)))
+                        .addContainerGap(327, Short.MAX_VALUE))))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 629, Short.MAX_VALUE)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addGap(27, 27, 27)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(searchField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(searchBtn1)
+                    .addComponent(showAllBtn1)
+                    .addComponent(Searchlabel1))
+                .addGap(22, 22, 22)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(sortIdRadio1)
+                    .addComponent(sortNameRadio1))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 501, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(14, Short.MAX_VALUE))
         );
 
         myTabbedPane.addTab("Course Mangement", jPanel2);
 
         getContentPane().add(myTabbedPane, java.awt.BorderLayout.CENTER);
 
-        jPanel3.setLayout(new java.awt.GridLayout(1, 0));
+        jPanel3.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 20, 5));
 
         addBtn.setText("Add");
         addBtn.addActionListener(this::addBtnActionPerformed);
@@ -333,7 +452,7 @@ public class MainPage extends javax.swing.JFrame {
         AddStudentDialog dialog = new AddStudentDialog(this, true);
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
-        refreshStudentTable(); 
+        refreshTable(); 
         statusLabel.setText("Status: Student added successfully.");
 
     } else if (currentTab == 1) {
@@ -342,7 +461,7 @@ public class MainPage extends javax.swing.JFrame {
         AddCourseDialog dialog = new AddCourseDialog(this, true); 
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
-        refreshCourseTable(); 
+        refreshTable(); 
         statusLabel.setText("Status: Course added successfully.");
     }
     }//GEN-LAST:event_addBtnActionPerformed
@@ -360,11 +479,11 @@ public class MainPage extends javax.swing.JFrame {
     }//GEN-LAST:event_printBtnActionPerformed
 
     private void sortNameRadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sortNameRadioActionPerformed
-        refreshStudentTable();
+        refreshTable();
     }//GEN-LAST:event_sortNameRadioActionPerformed
 
     private void passingCheckBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_passingCheckBoxActionPerformed
-        refreshStudentTable();
+        refreshTable();
     }//GEN-LAST:event_passingCheckBoxActionPerformed
 
     private void marksSliderStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_marksSliderStateChanged
@@ -378,12 +497,12 @@ public class MainPage extends javax.swing.JFrame {
     // It becomes FALSE the exact millisecond they let go.
     if (!marksSlider.getValueIsAdjusting()) {
         // Only run the heavy database query when they finish dragging!
-        refreshStudentTable();
+        refreshTable();
     }
     }//GEN-LAST:event_marksSliderStateChanged
 
     private void searchBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchBtnActionPerformed
-        refreshStudentTable();
+        refreshTable();
     }//GEN-LAST:event_searchBtnActionPerformed
 
     private void showAllBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showAllBtnActionPerformed
@@ -391,19 +510,19 @@ public class MainPage extends javax.swing.JFrame {
         marksSlider.setValue(0);
         passingCheckBox.setSelected(false);
         sortIdRadio.setSelected(true);
-        refreshStudentTable();
+        refreshTable();
     }//GEN-LAST:event_showAllBtnActionPerformed
 
     private void searchFieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_searchFieldKeyReleased
-        refreshStudentTable();
+        refreshTable();
     }//GEN-LAST:event_searchFieldKeyReleased
 
     private void sortIdRadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sortIdRadioActionPerformed
-        refreshStudentTable();
+        refreshTable();
     }//GEN-LAST:event_sortIdRadioActionPerformed
 
     private void sortMarksRadioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sortMarksRadioActionPerformed
-        refreshStudentTable();
+        refreshTable();
     }//GEN-LAST:event_sortMarksRadioActionPerformed
 
     private void addGradeBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addGradeBtnActionPerformed
@@ -420,89 +539,163 @@ public class MainPage extends javax.swing.JFrame {
         dialog.setVisible(true);
         
         // Refresh the table when the pop-up closes
-        refreshStudentTable(); 
+        refreshTable(); 
     }
     }//GEN-LAST:event_addGradeBtnActionPerformed
 
     private void updateBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_updateBtnActionPerformed
-        int selectedRow = studentTable.getSelectedRow();
+        int currentTab = myTabbedPane.getSelectedIndex();
     
+    if (currentTab == 0) {
+        // ==========================================
+        //           STUDENT TAB LOGIC
+        // ==========================================
+        int selectedRow = studentTable.getSelectedRow();
+        
         if (selectedRow != -1) {
-            // Grab EVERYTHING from the highlighted row
+            // Grab the 5 columns from the Student table
             String id = studentTable.getValueAt(selectedRow, 0).toString();
             String name = studentTable.getValueAt(selectedRow, 1).toString();
             String email = studentTable.getValueAt(selectedRow, 2).toString();
             String course = studentTable.getValueAt(selectedRow, 3).toString();
             String mark = studentTable.getValueAt(selectedRow, 4).toString();
-
-            // Open the pop-up and hand it the data!
-            UpdateDialog dialog = new UpdateDialog(this, true, id, name, email, course, mark);
+            
+            // Open the Student Update Dialog
+            UpdateStudentDialog dialog = new UpdateStudentDialog(this, true, id, name, email, course, mark);
             dialog.setLocationRelativeTo(this);
             dialog.setVisible(true);
-
-            // Refresh the table when they are done
-            refreshStudentTable();
+            
+            refreshTable(); // Instantly reload the screen!
         } else {
             javax.swing.JOptionPane.showMessageDialog(this, "Please select a student from the table first.");
         }
+        
+    } else if (currentTab == 1) {
+        // ==========================================
+        //           COURSE TAB LOGIC
+        // ==========================================
+        int selectedRow = courseTable.getSelectedRow(); // Make sure this matches your Course table variable!
+        
+        if (selectedRow != -1) {
+            // Grab the 2 columns from the Course table
+            String courseId = courseTable.getValueAt(selectedRow, 0).toString();
+            String courseName = courseTable.getValueAt(selectedRow, 1).toString();
+            
+            // Open the Course Update Dialog (We will build this next!)
+            UpdateCourseDialog dialog = new UpdateCourseDialog(this, true, courseId, courseName);
+            dialog.setLocationRelativeTo(this);
+            dialog.setVisible(true);
+            
+            refreshTable(); // Instantly reload the screen!
+        } else {
+            javax.swing.JOptionPane.showMessageDialog(this, "Please select a course from the table first.");
+        }
+    }
     }//GEN-LAST:event_updateBtnActionPerformed
 
     private void deleteBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteBtnActionPerformed
-        int selectedRow = studentTable.getSelectedRow();
+        int currentTab = myTabbedPane.getSelectedIndex();
     
+    if (currentTab == 0) {
+        // ==========================================
+        //           STUDENT TAB LOGIC
+        // ==========================================
+        int selectedRow = studentTable.getSelectedRow();
+        
         if (selectedRow != -1) {
-            // 1. Grab the necessary data from the table
             String studentId = studentTable.getValueAt(selectedRow, 0).toString();
             String studentName = studentTable.getValueAt(selectedRow, 1).toString();
             String courseName = studentTable.getValueAt(selectedRow, 3).toString();
 
-            // 2. Defensive UI: The Confirmation Dialog
             int confirm = javax.swing.JOptionPane.showConfirmDialog(this, 
                 "Are you sure you want to completely remove the grade for " + studentName + " in " + courseName + "?\n\nThis action cannot be undone.", 
                 "Confirm Delete", 
                 javax.swing.JOptionPane.YES_NO_OPTION, 
                 javax.swing.JOptionPane.WARNING_MESSAGE);
 
-            // 3. If they click "Yes"
             if (confirm == javax.swing.JOptionPane.YES_OPTION) {
                 try {
-                    // Translate the friendly name ("Cybersecurity 101") back to the ID ("CYB201")
                     String courseId = models.Course.getIdByName(courseName);
-
-                    if (courseId == null) {
-                        throw new RuntimeException("System error: Could not resolve Course ID.");
-                    }
-
-                    // Pack the DTO Suitcase
                     models.Student studentToDelete = new models.Student();
                     studentToDelete.setId(studentId);
                     studentToDelete.setCourse(courseId);
-
-                    // Execute the backend deletion
+                    
                     studentToDelete.deleteEnrollment();
 
-                    // Success! Refresh the table instantly
-                    javax.swing.JOptionPane.showMessageDialog(this, 
-                        "Record deleted successfully.", 
-                        "Deleted", 
-                        javax.swing.JOptionPane.INFORMATION_MESSAGE);
-                    refreshStudentTable();
-
+                    javax.swing.JOptionPane.showMessageDialog(this, "Record deleted successfully.");
+                    refreshTable(); // Refresh the screen!
+                    
                 } catch (RuntimeException ex) {
-                    javax.swing.JOptionPane.showMessageDialog(this, 
-                        ex.getMessage(), 
-                        "Delete Failed", 
-                        javax.swing.JOptionPane.ERROR_MESSAGE);
+                    javax.swing.JOptionPane.showMessageDialog(this, ex.getMessage(), "Delete Failed", javax.swing.JOptionPane.ERROR_MESSAGE);
                 }
             }
         } else {
-            // If they click Delete without highlighting a row first
-            javax.swing.JOptionPane.showMessageDialog(this, 
-                "Please select a record from the table to delete.", 
-                "Select a Record", 
-                javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            javax.swing.JOptionPane.showMessageDialog(this, "Please select a student from the table first.");
         }
+        
+    } else if (currentTab == 1) {
+        // ==========================================
+        //           COURSE TAB LOGIC
+        // ==========================================
+        int selectedRow = courseTable.getSelectedRow();
+        
+        if (selectedRow != -1) {
+            String courseId = courseTable.getValueAt(selectedRow, 0).toString();
+            String courseName = courseTable.getValueAt(selectedRow, 1).toString();
+            System.out.println("DEBUG: Trying to delete Course ID: [" + courseId + "]");
+            System.out.println("DEBUG: Trying to delete Course Name: [" + courseName + "]");
+            // DEFENSIVE UI: Warn them that this deletes grades too!
+            int confirm = javax.swing.JOptionPane.showConfirmDialog(this, 
+                "Are you sure you want to completely delete the course '" + courseName + "'?\n\nWARNING: This will also erase all student grades associated with this course. This action cannot be undone.", 
+                "Confirm Course Deletion", 
+                javax.swing.JOptionPane.YES_NO_OPTION, 
+                javax.swing.JOptionPane.ERROR_MESSAGE); // Use ERROR_MESSAGE for a scary red icon
+
+            if (confirm == javax.swing.JOptionPane.YES_OPTION) {
+                try {
+                    models.Course courseToDelete = new models.Course();
+                    courseToDelete.setCourseId(courseId);
+                    
+                    courseToDelete.delete(); // Calls our new transaction method!
+
+                    javax.swing.JOptionPane.showMessageDialog(this, "Course and associated grades deleted successfully.");
+                    refreshTable(); // Refresh the screen!
+                    
+                } catch (RuntimeException ex) {
+                    javax.swing.JOptionPane.showMessageDialog(this, ex.getMessage(), "Delete Failed", javax.swing.JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        } else {
+            javax.swing.JOptionPane.showMessageDialog(this, "Please select a course from the table first.");
+        }
+    }
     }//GEN-LAST:event_deleteBtnActionPerformed
+
+    private void searchField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchField1ActionPerformed
+        
+    }//GEN-LAST:event_searchField1ActionPerformed
+
+    private void searchField1KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_searchField1KeyReleased
+        refreshTable();
+    }//GEN-LAST:event_searchField1KeyReleased
+
+    private void searchBtn1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchBtn1ActionPerformed
+        refreshTable();
+    }//GEN-LAST:event_searchBtn1ActionPerformed
+
+    private void sortIdRadio1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sortIdRadio1ActionPerformed
+        refreshTable();
+    }//GEN-LAST:event_sortIdRadio1ActionPerformed
+
+    private void sortNameRadio1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sortNameRadio1ActionPerformed
+        refreshTable();
+    }//GEN-LAST:event_sortNameRadio1ActionPerformed
+
+    private void showAllBtn1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showAllBtn1ActionPerformed
+        searchField1.setText("");
+        sortIdRadio1.setSelected(true);
+        refreshTable();
+    }//GEN-LAST:event_showAllBtn1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -529,93 +722,59 @@ public class MainPage extends javax.swing.JFrame {
         java.awt.EventQueue.invokeLater(() -> new MainPage().setVisible(true));
     }
     
-    private void refreshStudentTable() {
-    // 1. The JOIN Query: We stitch all three tables together!
-    // We use aliases (s, e, c) to make typing the table names shorter.
-    StringBuilder sql = new StringBuilder(
-        "SELECT s.student_id, s.name, s.email, c.course_name, e.mark " +
-        "FROM students s " +
-        "JOIN enrollments e ON s.student_id = e.student_id " +
-        "JOIN courses c ON e.course_id = c.course_id " +
-        "WHERE 1=1 "
-    );
-    
-    // 2. Read the Search Bar (Notice we have to specify WHICH table the column is in)
-    String keyword = searchField.getText().trim();
-    
-    if (!keyword.isEmpty()) {
-        // Find out what the user selected in the dropdown
-        String searchCategory = searchTypeComboBox.getSelectedItem().toString();
-        
-        // Append a specific SQL rule based on their choice
-        if (searchCategory.equals("Student Name")) {
-            sql.append("AND s.name LIKE '%").append(keyword).append("%' ");
-            
-        } else if (searchCategory.equals("Student ID")) {
-            sql.append("AND s.student_id LIKE '%").append(keyword).append("%' ");
-            
-        } else if (searchCategory.equals("Course")) {
-            sql.append("AND c.course_name LIKE '%").append(keyword).append("%' ");
-            
-        } else if (searchCategory.equals("Email")) {
-            sql.append("AND s.email LIKE '%").append(keyword).append("%' ");
-        }
-    }
-    
-    // 3. Read the JSlider
-    int minMarks = marksSlider.getValue();
-    if (minMarks > 0) {
-        sql.append("AND e.mark >= ").append(minMarks).append(" ");
-    }
-    
-    // 4. Read the JCheckBox
-    if (passingCheckBox.isSelected()) {
-        sql.append("AND e.mark >= 50 ");
-    }
-    
-    // 5. Read the JRadioButtons
-    if (sortNameRadio.isSelected()) {
-        sql.append("ORDER BY s.name ASC");
-    } else if (sortMarksRadio.isSelected()) {
-        sql.append("ORDER BY e.mark DESC"); 
-    } else {
-        sql.append("ORDER BY s.student_id ASC");
-    }
+    private void refreshTable() {
+        int activeTab = myTabbedPane.getSelectedIndex();
 
-    // 6. Execute the Query and Update the JTable
-    try (java.sql.Connection conn = database.DBConnection.getConnection();
-         java.sql.Statement stmt = conn.createStatement();
-         java.sql.ResultSet rs = stmt.executeQuery(sql.toString())) {
-         
-        javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) studentTable.getModel();
-        model.setRowCount(0); 
-        
-        while (rs.next()) {
-            model.addRow(new Object[]{
-                rs.getString("student_id"),
-                rs.getString("name"),
-                rs.getString("email"),
-                // Grab the joined columns!
-                rs.getString("course_name"), 
-                rs.getDouble("mark")          
-            });
-        }
-        
-        statusLabel.setText("System Ready. Data loaded successfully.");
-        statusLabel.setForeground(new java.awt.Color(0, 153, 51)); // Dark Green
-        
-    } catch (java.sql.SQLException ex) {
-        statusLabel.setText("Database error: " + ex.getMessage());
-        statusLabel.setForeground(java.awt.Color.RED);
-    }
+            if (activeTab == 0) {
+                // ==========================================
+                //           STUDENT TAB LOGIC
+                // ==========================================
+                String keyword = searchField.getText().trim();
+
+                String sortBy = "ID"; 
+                if (sortNameRadio.isSelected()) sortBy = "NAME";
+                else if (sortMarksRadio.isSelected()) sortBy = "MARKS";
+
+                double minMarks = passingCheckBox.isSelected() ? 50.0 : marksSlider.getValue();
+
+                // Ask Student model for data
+                java.util.ArrayList<Object[]> data = models.Student.getData(keyword, sortBy, minMarks);
+
+                // Paint Student Table
+                javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) studentTable.getModel();
+                model.setRowCount(0); 
+                for (Object[] row : data) {
+                    model.addRow(row); 
+                }
+
+            } else if (activeTab == 1) {
+                // ==========================================
+                //           COURSE TAB LOGIC
+                // ==========================================
+                String keyword = searchField1.getText().trim();
+                boolean sortByName = sortNameRadio1.isSelected();
+                
+                // Ask Course model for data
+                java.util.ArrayList<String[]> data = models.Course.getData(keyword, sortByName);
+                
+                // Paint Course Table
+                javax.swing.table.DefaultTableModel model = (javax.swing.table.DefaultTableModel) courseTable.getModel();
+                model.setRowCount(0); 
+                for (String[] row : data) {
+                    model.addRow(row); 
+                }
+            }
+    
 }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel Searchlabel;
+    private javax.swing.JLabel Searchlabel1;
     private javax.swing.JMenu aboutBtn;
     private javax.swing.JButton addBtn;
     private javax.swing.JButton addGradeBtn;
     private javax.swing.ButtonGroup buttonGroup1;
+    private javax.swing.JTable courseTable;
     private javax.swing.JButton deleteBtn;
     private javax.swing.JMenuItem exitBtn;
     private javax.swing.JMenu fileBtn;
@@ -626,19 +785,25 @@ public class MainPage extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JSlider marksSlider;
     private javax.swing.JTabbedPane myTabbedPane;
     private javax.swing.JCheckBox passingCheckBox;
     private javax.swing.JMenuItem printBtn;
     private javax.swing.JButton searchBtn;
+    private javax.swing.JButton searchBtn1;
     private javax.swing.JTextField searchField;
+    private javax.swing.JTextField searchField1;
     private javax.swing.JComboBox<String> searchTypeComboBox;
     private javax.swing.JButton showAllBtn;
+    private javax.swing.JButton showAllBtn1;
     private javax.swing.JLabel sliderLabel;
     private javax.swing.JRadioButton sortIdRadio;
+    private javax.swing.JRadioButton sortIdRadio1;
     private javax.swing.JRadioButton sortMarksRadio;
     private javax.swing.JRadioButton sortNameRadio;
+    private javax.swing.JRadioButton sortNameRadio1;
     private javax.swing.JLabel statusLabel;
     private javax.swing.JTable studentTable;
     private javax.swing.JButton updateBtn;

@@ -7,14 +7,10 @@ import java.sql.*;
 public class Course implements DatabaseOperations {
     private String courseId;
     private String courseName;
-    private double creditWeight;
-    private String originalCourseId;
 
-    public Course(String courseId, String courseName, double creditWeight) {
+    public Course(String courseId, String courseName) {
         this.courseId = courseId;
-        this.originalCourseId = courseId;
         this.courseName = courseName;
-        this.creditWeight = creditWeight;
     }
 
     public Course() {
@@ -29,13 +25,7 @@ public class Course implements DatabaseOperations {
         this.courseId = (courseId == null) ? "" : courseId.trim().toUpperCase();
     }
 
-    public String getOriginalCourseId() {
-        return originalCourseId;
-    }
-
-    public void setOriginalCourseId(String originalCourseId) {
-        this.originalCourseId = (originalCourseId == null) ? "" : originalCourseId.trim().toUpperCase();
-    }
+    
 
     public String getCourseName() {
         return courseName;
@@ -45,141 +35,144 @@ public class Course implements DatabaseOperations {
         this.courseName = (courseName == null) ? "" : StringHelper.toTitleCase(courseName);
     }
 
-    public double getCreditWeight() {
-        return creditWeight;
-    }
+    
 
-    public void setCreditWeight(double creditWeight) {
-        this.creditWeight = (creditWeight < 0) ? 0 : creditWeight;
-    }
+   
 
-    public void syncOriginalId() {
-        this.originalCourseId = this.courseId;
-    }
-
-    public boolean isIdChanged() {
-        if (this.courseId == null || this.originalCourseId == null) {
-            return false;
-        }
-        return !this.courseId.trim().equalsIgnoreCase(this.originalCourseId.trim());
-    }
-
-    public void displayInfo() {
-        String idStatus = isIdChanged() ? " (ID changed from: " + originalCourseId + ")" : "";
-        System.out.println("Course ID: " + courseId + ", Name: " + courseName + ", Weight: " + creditWeight + idStatus);
-    }
+   
 
     @Override
     public void add() {
-        String sql = "INSERT INTO courses (course_id, course_name, credit_weight) VALUES (?, ?, ?)";
+        // We use an INSERT statement specifically for the courses table
+        String sql = "INSERT INTO courses (course_id, course_name) VALUES (?, ?)";
         
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (java.sql.Connection conn = database.DBConnection.getConnection();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             
+            // Read from the "suitcase"
+            pstmt.setString(1, this.getCourseId());   
+            pstmt.setString(2, this.getCourseName()); 
             
-            String cleanId = this.courseId.trim().toUpperCase();
-            String cleanName = StringHelper.toTitleCase(this.courseName);
-            
-            pstmt.setString(1, cleanId);
-            pstmt.setString(2, cleanName);
-            pstmt.setDouble(3, this.creditWeight);
             pstmt.executeUpdate();
+            System.out.println("SUCCESS: Added new course: " + this.getCourseName());
             
-            this.courseId = cleanId;
-            this.courseName = cleanName;
-            System.out.println("Course added: " + cleanName);
-            
-        } catch (SQLException e) {
-            System.err.println("Error adding course: " + e.getMessage());
+        } catch (java.sql.SQLException e) {
+            // If the user tries to add an ID that already exists, it will throw an error here!
+            throw new RuntimeException("Database error. The Course ID might already exist: " + e.getMessage(), e);
         }
     }
 
     @Override
     public void delete() {
-        String sql = "DELETE FROM courses WHERE course_id = ?";
+        // 1. First, delete the links in the enrollments table
+        String deleteEnrollmentsSql = "DELETE FROM enrollments WHERE course_id = ?";
+        // 2. Then, delete the course itself
+        String deleteCourseSql = "DELETE FROM courses WHERE course_id = ?";
         
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        java.sql.Connection conn = null;
+        try {
+            conn = database.DBConnection.getConnection();
+            conn.setAutoCommit(false); // Start transaction
             
-            String targetId = this.courseId.trim().toUpperCase();
-            pstmt.setString(1, targetId);
-            int affectedRows = pstmt.executeUpdate();
-            
-            if (affectedRows > 0) {
-                System.out.println("Course deleted: " + targetId);
-            } else {
-                System.out.println("Course not found: " + targetId);
+            // Step 1: Wipe the enrollments
+            try (java.sql.PreparedStatement pstmt1 = conn.prepareStatement(deleteEnrollmentsSql)) {
+                pstmt1.setString(1, this.getCourseId());
+                pstmt1.executeUpdate(); // We don't check rows affected, because it's okay if 0 students were enrolled
             }
             
-        } catch (SQLException e) {
-            System.err.println("Error deleting course: " + e.getMessage());
+            // Step 2: Wipe the course
+            try (java.sql.PreparedStatement pstmt2 = conn.prepareStatement(deleteCourseSql)) {
+                pstmt2.setString(1, this.getCourseId());
+                int rowsAffected = pstmt2.executeUpdate();
+                
+                if (rowsAffected == 0) {
+                    throw new RuntimeException("Could not find the course to delete.");
+                }
+            }
+            
+            // Both succeeded! Commit to the database.
+            conn.commit(); 
+            System.out.println("SUCCESS: Deleted course " + this.getCourseName());
+            
+        } catch (java.sql.SQLException e) {
+            // Undo everything if it crashes
+            if (conn != null) {
+                try { conn.rollback(); } catch (java.sql.SQLException ex) {}
+            }
+            throw new RuntimeException("Database error deleting course: " + e.getMessage(), e);
+        } finally {
+            if (conn != null) {
+                try { conn.setAutoCommit(true); conn.close(); } catch (java.sql.SQLException ex) {}
+            }
         }
     }
 
     @Override
     public void update() {
-        String sql = "UPDATE courses SET course_id = ?, course_name = ?, credit_weight = ? WHERE course_id = ?";
+        // We strictly target the course_name, using the course_id to find the exact row
+        String sql = "UPDATE courses SET course_name = ? WHERE course_id = ?";
         
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (java.sql.Connection conn = database.DBConnection.getConnection();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             
+            // Read the data directly out of the "suitcase"
+            pstmt.setString(1, this.getCourseName());
+            pstmt.setString(2, this.getCourseId());
             
-            String newCleanId = this.courseId.trim().toUpperCase();
-            String cleanName = StringHelper.toTitleCase(this.courseName);
+            int rowsAffected = pstmt.executeUpdate();
             
-            pstmt.setString(1, newCleanId);
-            pstmt.setString(2, cleanName);
-            pstmt.setDouble(3, this.creditWeight);
-            pstmt.setString(4, this.originalCourseId);
-            
-            int affectedRows = pstmt.executeUpdate();
-            
-            if (affectedRows > 0) {
-                this.originalCourseId = newCleanId;
-                this.courseId = newCleanId;
-                this.courseName = cleanName;
-                System.out.println("Course updated");
-            } else {
-                System.out.println("Update failed: Course not found");
+            if (rowsAffected == 0) {
+                throw new RuntimeException("Could not find the course to update.");
             }
             
-        } catch (SQLException e) {
-            System.err.println("Error updating course: " + e.getMessage());
+            System.out.println("SUCCESS: Updated course to " + this.getCourseName());
+            
+        } catch (java.sql.SQLException e) {
+            throw new RuntimeException("Database error updating course: " + e.getMessage(), e);
         }
     }
 
-    @Override
-    public void search(String keyword) {
-        String sql = "SELECT * FROM courses WHERE course_id LIKE ? OR course_name LIKE ?";
+    public static java.util.ArrayList<String[]> getData(String keyword, boolean sortByName) {
+        java.util.ArrayList<String[]> courseList = new java.util.ArrayList<>();
         
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        // 1. Build the SQL query
+        // We search in BOTH the course_id and course_name
+        StringBuilder sql = new StringBuilder(
+            "SELECT course_id, course_name FROM courses " +
+            "WHERE course_id LIKE ? OR course_name LIKE ?"
+        );
+        
+        // 2. Add the dynamic sorting based on the radio buttons
+        if (sortByName) {
+            sql.append(" ORDER BY course_name ASC");
+        } else {
+            sql.append(" ORDER BY course_id ASC");
+        }
+        
+        // 3. Connect to DB and execute
+        try (java.sql.Connection conn = database.DBConnection.getConnection();
+             java.sql.PreparedStatement pstmt = conn.prepareStatement(sql.toString())) {
             
+            // Add the % wildcard symbols to allow partial matching
             String searchPattern = "%" + keyword + "%";
             pstmt.setString(1, searchPattern);
             pstmt.setString(2, searchPattern);
             
-            ResultSet rs = pstmt.executeQuery();
-            int matchCount = 0;
-            
-            System.out.println("Search Results for: " + keyword);
-            System.out.println("----------------------------------------");
-            
-            while (rs.next()) {
-                matchCount++;
-                System.out.println("ID: " + rs.getString("course_id"));
-                System.out.println("Name: " + rs.getString("course_name"));
-                System.out.println("Weight: " + rs.getDouble("credit_weight"));
-                System.out.println("----------------------------------------");
+            try (java.sql.ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    // 4. Package each row as a String array: [ID, Name]
+                    String[] row = new String[2];
+                    row[0] = rs.getString("course_id");
+                    row[1] = rs.getString("course_name");
+                    
+                    courseList.add(row);
+                }
             }
-            
-            if (matchCount == 0) {
-                System.out.println("No courses found for: " + keyword);
-            } else {
-                System.out.println("Total found: " + matchCount);
-            }
-            
-        } catch (SQLException e) {
-            System.err.println("Error searching courses: " + e.getMessage());
+        } catch (java.sql.SQLException e) {
+            System.err.println("Error loading course table: " + e.getMessage());
         }
+        
+        return courseList;
     }
     
     public static String getIdByName(String courseName) {

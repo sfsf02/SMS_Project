@@ -8,13 +8,13 @@ package gui;
  *
  * @author musta
  */
-public class UpdateDialog extends javax.swing.JDialog {
+public class UpdateStudentDialog extends javax.swing.JDialog {
     
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(UpdateDialog.class.getName());
+    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(UpdateStudentDialog.class.getName());
     private final String lockedCourseId;
     private final String lockedStudentId;
 
-    public UpdateDialog(java.awt.Frame parent, boolean modal, String id, String name, String email, String courseName, String mark) {
+    public UpdateStudentDialog(java.awt.Frame parent, boolean modal, String id, String name, String email, String courseName, String mark) {
         super(parent, modal);
         initComponents();
         
